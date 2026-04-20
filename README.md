@@ -1,20 +1,20 @@
 # caotengde.github.io
 
-个人学术博客与 GitHub Pages 主页。
+Personal academic blog and GitHub Pages homepage.
 
-## 本地预览
+## Local Preview
 
-直接在浏览器打开 `index.html` 即可预览。也可以运行：
+Open `index.html` directly in a browser, or run:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-然后访问 `http://localhost:8000`。
+Then visit `http://localhost:8000`.
 
-## 发布到 GitHub Pages
+## Deploy to GitHub Pages
 
-如果这是一个新目录，可以执行：
+If this is a new local directory, run:
 
 ```bash
 git init
@@ -25,19 +25,19 @@ git commit -m "Create academic blog"
 git push -u origin main
 ```
 
-发布后访问：
+After deployment, visit:
 
 ```text
 https://caotengde.github.io
 ```
 
-## 常用修改位置
+## Common Edit Locations
 
-- 主页信息：`index.html`
-- 文章列表：`blog.html`
-- 单篇文章：`posts/`
-- 样式：`styles.css`
-- 站点图标：`assets/favicon.svg`
-- 主页封面图：`assets/academic-hero.png`
+- Homepage content: `index.html`
+- Notes list: `blog.html`
+- Individual posts: `posts/`
+- Styles: `styles.css`
+- Site icon: `assets/favicon.svg`
+- Homepage hero image: `assets/academic-hero.png`
 
-新增文章时，可以复制 `posts/reading-note-template.html`，改文件名、标题、日期和正文，再把链接加入 `blog.html` 与 `index.html`。
+To add a new note, copy `posts/reading-note-template.html`, update the filename, title, date and body, then add links in `blog.html` and `index.html`.
