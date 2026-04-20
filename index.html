@@ -54,8 +54,8 @@
           <h2 id="about-title">以清晰、可复用的方式记录研究。</h2>
         </div>
         <div class="prose">
-          <p>欢迎来到我的学术主页。这里整理我在航天器姿态控制、多智能体编队、无人系统与容错控制方向的论文、研究札记和后续项目。</p>
-          <p>主页会保持简洁：论文列表放置可追踪的 DOI 与 Google Scholar 入口，长篇推导、阅读记录和项目复盘会沉淀到博客文章中。</p>
+          <p>欢迎来到我的学术主页。这里整理我在 computer vision、robotics、6D pose estimation 与 object tracking 方向的论文、研究札记和后续项目。</p>
+          <p>主页会保持简洁：论文列表只放当前确认的成果，并保留 arXiv、PDF、代码和 Google Scholar 入口，方便后续逐步更新。</p>
         </div>
       </div>
     </section>
@@ -68,18 +68,18 @@
       <div class="card-grid three">
         <article class="card">
           <span class="card-index">01</span>
-          <h3>Aerospace Control</h3>
-          <p>关注航天器姿态跟踪、直升机编队、飞行器执行器故障与外部扰动下的鲁棒控制问题。</p>
+          <h3>Computer Vision</h3>
+          <p>关注视觉感知系统中的目标定位、分割、跟踪与场景理解，强调能在真实动态场景中工作的算法。</p>
         </article>
         <article class="card">
           <span class="card-index">02</span>
-          <h3>Fixed-Time Control</h3>
-          <p>研究固定时间、预定义时间与有限时间稳定性设计，强调可证明的收敛性能与瞬态约束。</p>
+          <h3>6D Pose Estimation</h3>
+          <p>研究从图像中估计物体六自由度姿态的方法，减少对人工标注、预定义 3D 模型和密集先验的依赖。</p>
         </article>
         <article class="card">
           <span class="card-index">03</span>
-          <h3>Robotics and Multi-Agent Systems</h3>
-          <p>围绕移动机器人、多 UAV、无人艇等系统，探索观测器、估计器、编队跟踪与容错协同控制。</p>
+          <h3>Robust Object Tracking</h3>
+          <p>关注遮挡、快速运动和光照变化下的目标重定位，让视觉系统在失效后能够自动恢复跟踪。</p>
         </article>
       </div>
     </section>
@@ -95,122 +95,16 @@
       <div class="publication-list">
         <article class="publication">
           <div>
-            <p class="pub-year">2026</p>
-            <h3>Improved Learning Observer-Based Robust Formation Tracking Control of Helicopters Under Fixed and Switching Topologies</h3>
-            <p><strong>Teng Cao</strong>, Baodi Guo, Shaohua Yang, Yongyuan Xu. <em>IEEE Transactions on Aerospace and Electronic Systems</em>, 62, 6771-6787.</p>
+            <p class="pub-year">arXiv 2025</p>
+            <h3>STORM: Segment, Track, and Object Re-Localization from a Single Image</h3>
+            <p>Yu Deng*, <strong>Teng Cao*</strong>, Hikaru Shindo, Jiahong Xue, Quentin Delfosse, Kristian Kersting. <em>arXiv:2511.09771</em>. Equal contribution.</p>
+            <p>STORM is an annotation-free real-time 6D pose estimation and tracking system for robust object segmentation, tracking, and re-localization from a single image.</p>
           </div>
           <div class="pub-links" aria-label="Publication links">
-            <a href="https://doi.org/10.1109/TAES.2026.3667833" target="_blank" rel="noreferrer">DOI</a>
-          </div>
-        </article>
-        <article class="publication">
-          <div>
-            <p class="pub-year">2026</p>
-            <h3>Adaptive fault-tolerant control for spacecraft attitude systems with fixed-time convergence</h3>
-            <p>Yi Gao, <strong>Teng Cao</strong>, Zhen Tang, Baodi Guo. <em>Proceedings of the Institution of Mechanical Engineers, Part G: Journal of Aerospace Engineering</em>, 240(3), 570-581.</p>
-          </div>
-          <div class="pub-links" aria-label="Publication links">
-            <a href="https://doi.org/10.1177/09544100251383785" target="_blank" rel="noreferrer">DOI</a>
-          </div>
-        </article>
-        <article class="publication">
-          <div>
-            <p class="pub-year">2026</p>
-            <h3>A Framework of Fixed-Time Trajectory Tracking Control for Multi-Mobile Robots Leader-Follower Formation</h3>
-            <p>Xiaoying Wang, <strong>Teng Cao</strong>, Yixuan Xue, Yongyuan Xu. <em>International Journal of Robust and Nonlinear Control</em>, 36(3), 1519-1533.</p>
-          </div>
-          <div class="pub-links" aria-label="Publication links">
-            <a href="https://doi.org/10.1002/rnc.70224" target="_blank" rel="noreferrer">DOI</a>
-          </div>
-        </article>
-        <article class="publication">
-          <div>
-            <p class="pub-year">2026</p>
-            <h3>Neural-adaptive chattering-free sliding mode attitude tracking control for spacecraft with fixed-time convergence</h3>
-            <p>Yuyang Wang, <strong>Teng Cao</strong>, Yixuan Xue, Shaohua Yang. <em>Proceedings of the Institution of Mechanical Engineers, Part G: Journal of Aerospace Engineering</em>, 240(1), 153-165.</p>
-          </div>
-          <div class="pub-links" aria-label="Publication links">
-            <a href="https://doi.org/10.1177/09544100251369104" target="_blank" rel="noreferrer">DOI</a>
-          </div>
-        </article>
-        <article class="publication">
-          <div>
-            <p class="pub-year">2025</p>
-            <h3>Prescribed-Performance-Bound-Based Adaptive Fault-Tolerant Control for Rigid Spacecraft Attitude Systems</h3>
-            <p>Zixuan Chen, <strong>Teng Cao</strong>, Shaohua Yang, Yang Cao. <em>Actuators</em>, 14(9), 455.</p>
-          </div>
-          <div class="pub-links" aria-label="Publication links">
-            <a href="https://doi.org/10.3390/act14090455" target="_blank" rel="noreferrer">DOI</a>
-          </div>
-        </article>
-        <article class="publication">
-          <div>
-            <p class="pub-year">2025</p>
-            <h3>Formation tracking control for nonholonomic mobile robots with predefined time convergence</h3>
-            <p>Yujie Wang, <strong>Teng Cao</strong>, Xiaoying Wang, Shaohua Yang. <em>Transactions of the Institute of Measurement and Control</em>.</p>
-          </div>
-          <div class="pub-links" aria-label="Publication links">
-            <a href="https://doi.org/10.1177/01423312251352884" target="_blank" rel="noreferrer">DOI</a>
-          </div>
-        </article>
-        <article class="publication">
-          <div>
-            <p class="pub-year">2025</p>
-            <h3>Guaranteed performance adaptive fixed-time neural control for robot manipulators with disturbance observer</h3>
-            <p>Jianbang Huang, <strong>Teng Cao</strong>, Zhe Zhang, Shaohua Yang. <em>Proceedings of the Institution of Mechanical Engineers, Part I: Journal of Systems and Control Engineering</em>, 239(6), 1107-1118.</p>
-          </div>
-          <div class="pub-links" aria-label="Publication links">
-            <a href="https://doi.org/10.1177/09596518241309127" target="_blank" rel="noreferrer">DOI</a>
-          </div>
-        </article>
-        <article class="publication">
-          <div>
-            <p class="pub-year">2025</p>
-            <h3>Terminal Sliding Mode Tracking Control of Uncertain Surface Vessels with Iterative Learning Estimator</h3>
-            <p>Zhaopeng Wang, <strong>Teng Cao</strong>, Yixuan Xue, Yongyuan Xu. <em>Unmanned Systems</em>, 1-13.</p>
-          </div>
-          <div class="pub-links" aria-label="Publication links">
-            <a href="https://doi.org/10.1142/S2301385026500330" target="_blank" rel="noreferrer">DOI</a>
-          </div>
-        </article>
-        <article class="publication">
-          <div>
-            <p class="pub-year">2025</p>
-            <h3>Adaptive reset control for group-bipartite formation of multi-UAVs subject to transmission delays</h3>
-            <p>Zhen Tang, Xinhua Wang, Ziyang Zhen, Zhengen Zhao, <strong>Teng Cao</strong>, Geert Deconinck. <em>Aerospace Science and Technology</em>, 160, 110068.</p>
-          </div>
-          <div class="pub-links" aria-label="Publication links">
-            <a href="https://doi.org/10.1016/j.ast.2025.110068" target="_blank" rel="noreferrer">DOI</a>
-          </div>
-        </article>
-        <article class="publication">
-          <div>
-            <p class="pub-year">2022</p>
-            <h3>Finite-Time Attitude Tracking Control for Hypersonic Flight Vehicles with Actuator Saturation</h3>
-            <p><strong>Teng Cao</strong>, Huajun Gong, Huiyunuo Xiao, Yixuan Xue. <em>International Journal of Aerospace Engineering</em>, 2022, 1-15.</p>
-          </div>
-          <div class="pub-links" aria-label="Publication links">
-            <a href="https://doi.org/10.1155/2022/5419377" target="_blank" rel="noreferrer">DOI</a>
-          </div>
-        </article>
-        <article class="publication">
-          <div>
-            <p class="pub-year">2022</p>
-            <h3>Observer-Based Predefined-Time Attitude Control for Spacecraft Subject to Loss of Actuator Effectiveness</h3>
-            <p><strong>Teng Cao</strong>, Huajun Gong, Bing Han. <em>Processes</em>, 10(11), 2294.</p>
-          </div>
-          <div class="pub-links" aria-label="Publication links">
-            <a href="https://doi.org/10.3390/pr10112294" target="_blank" rel="noreferrer">DOI</a>
-          </div>
-        </article>
-        <article class="publication">
-          <div>
-            <p class="pub-year">2022</p>
-            <h3>A novel learning observer-based fault-tolerant attitude control for rigid spacecraft</h3>
-            <p><strong>Teng Cao</strong>, Huajun Gong, Peng Cheng, Yixuan Xue. <em>Aerospace Science and Technology</em>, 128, 107751.</p>
-          </div>
-          <div class="pub-links" aria-label="Publication links">
-            <a href="https://doi.org/10.1016/j.ast.2022.107751" target="_blank" rel="noreferrer">DOI</a>
+            <a href="https://arxiv.org/abs/2511.09771" target="_blank" rel="noreferrer">arXiv</a>
+            <a href="https://arxiv.org/pdf/2511.09771" target="_blank" rel="noreferrer">PDF</a>
+            <a href="https://doi.org/10.48550/arXiv.2511.09771" target="_blank" rel="noreferrer">DOI</a>
+            <a href="https://github.com/dengyufuqin/Storm" target="_blank" rel="noreferrer">Code</a>
           </div>
         </article>
       </div>
