@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Teng Cao | Academic Blog</title>
-  <meta name="description" content="Teng Cao 的个人学术主页与研究札记。">
+  <meta name="description" content="Teng Cao 的个人学术主页，聚焦 machine learning, artificial intelligence, 3D vision, neuro-symbolic learning and robotics.">
   <meta name="author" content="Teng Cao">
   <link rel="canonical" href="https://caotengde.github.io/">
   <meta property="og:title" content="Teng Cao | Academic Blog">
-  <meta property="og:description" content="个人学术主页、研究方向、论文列表与博客札记。">
+  <meta property="og:description" content="Personal academic homepage for research in machine learning, 3D vision, neuro-symbolic learning and robotics.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://caotengde.github.io/">
   <meta property="og:image" content="https://caotengde.github.io/assets/academic-hero.png">
@@ -23,6 +23,7 @@
     </a>
     <nav class="site-nav" aria-label="Primary navigation">
       <a href="#research">Research</a>
+      <a href="#projects">Projects</a>
       <a href="#publications">Publications</a>
       <a href="blog.html">Notes</a>
       <a href="https://scholar.google.com/citations?user=rGbSMkcAAAAJ&amp;hl=zh-CN" target="_blank" rel="noreferrer">Scholar</a>
@@ -38,7 +39,7 @@
       <div class="hero-content">
         <p class="eyebrow">Personal Academic Blog</p>
         <h1 id="hero-title">Teng Cao</h1>
-        <p class="hero-copy">这里整理我的研究兴趣、论文与读书札记。你可以把它作为 GitHub Pages 个人学术主页的起点，逐步沉淀成自己的开放研究档案。</p>
+        <p class="hero-copy">Machine Learning and Artificial Intelligence graduate student at Technische Universität Darmstadt, working on 3D vision, deep generative models, neuro-symbolic learning and robotic perception.</p>
         <div class="hero-actions">
           <a class="button button-primary" href="#publications">View Publications <span aria-hidden="true">-&gt;</span></a>
           <a class="button button-secondary" href="https://scholar.google.com/citations?user=rGbSMkcAAAAJ&amp;hl=zh-CN" target="_blank" rel="noreferrer">Google Scholar <span aria-hidden="true">-&gt;</span></a>
@@ -54,8 +55,8 @@
           <h2 id="about-title">以清晰、可复用的方式记录研究。</h2>
         </div>
         <div class="prose">
-          <p>欢迎来到我的学术主页。这里整理我在 computer vision、robotics、6D pose estimation 与 object tracking 方向的论文、研究札记和后续项目。</p>
-          <p>主页会保持简洁：论文列表只放当前确认的成果，并保留 arXiv、PDF、代码和 Google Scholar 入口，方便后续逐步更新。</p>
+          <p>I am a graduate student in Machine Learning and Artificial Intelligence at Technische Universität Darmstadt. My research interests include deep generative models, probabilistic and geometric representation learning, 3D vision, neuro-symbolic learning and reinforcement learning.</p>
+          <p>This site keeps a compact record of my research projects, publications and notes. I write mostly about visual perception systems that can segment, track, reconstruct and reason about objects in dynamic scenes.</p>
         </div>
       </div>
     </section>
@@ -68,18 +69,47 @@
       <div class="card-grid three">
         <article class="card">
           <span class="card-index">01</span>
-          <h3>Computer Vision</h3>
-          <p>关注视觉感知系统中的目标定位、分割、跟踪与场景理解，强调能在真实动态场景中工作的算法。</p>
+          <h3>3D Vision and Robotics</h3>
+          <p>Object segmentation, 6D pose estimation, tracking, NOCS reconstruction and geometry-aware perception for robotic systems.</p>
         </article>
         <article class="card">
           <span class="card-index">02</span>
-          <h3>6D Pose Estimation</h3>
-          <p>研究从图像中估计物体六自由度姿态的方法，减少对人工标注、预定义 3D 模型和密集先验的依赖。</p>
+          <h3>Deep Generative Models</h3>
+          <p>Transformers, VAEs, diffusion models and flow matching for vision, representation learning and 3D reconstruction.</p>
         </article>
         <article class="card">
           <span class="card-index">03</span>
-          <h3>Robust Object Tracking</h3>
-          <p>关注遮挡、快速运动和光照变化下的目标重定位，让视觉系统在失效后能够自动恢复跟踪。</p>
+          <h3>Neuro-Symbolic Learning</h3>
+          <p>Reinforcement learning systems that acquire structured world knowledge and use it for interpretable decision-making.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="projects" aria-labelledby="projects-title">
+      <div class="section-heading">
+        <p class="section-kicker">Projects</p>
+        <h2 id="projects-title">Selected Projects</h2>
+      </div>
+      <div class="card-grid two">
+        <article class="card project-card">
+          <p class="note-date">2025</p>
+          <h3>STORM</h3>
+          <p>Segment, Track, and Object Re-Localization from a Single Image. A unified framework for annotation-free robust 6D object pose estimation and tracking.</p>
+        </article>
+        <article class="card project-card">
+          <p class="note-date">2025 - now</p>
+          <h3>Memory-A1</h3>
+          <p>A neuro-symbolic memory agent that builds and updates structured world knowledge from interaction trajectories for reinforcement learning.</p>
+        </article>
+        <article class="card project-card">
+          <p class="note-date">2025</p>
+          <h3>NOCSFlow-3D</h3>
+          <p>A flow-matching framework for NOCS-based 6D pose estimation, object mask prediction and 3D reconstruction from a single RGB image.</p>
+        </article>
+        <article class="card project-card">
+          <p class="note-date">2024 - 2025</p>
+          <h3>Rope Trajectory Tracking</h3>
+          <p>A conditional diffusion approach for rope trajectory tracking and intersection detection, evaluated with synthetic data generated in Unity3D.</p>
         </article>
       </div>
     </section>
@@ -139,17 +169,38 @@
       </div>
       <div class="timeline">
         <article class="timeline-item">
-          <span>Now</span>
+          <span>2025 - now</span>
           <div>
-            <h3>Research focus</h3>
-            <p>在这里写当前身份、机构、研究方向或正在进行的项目。</p>
+            <h3>Student Research Assistant, AIML Lab</h3>
+            <p>Working on knowledge base construction for AtariWorld at the Artificial Intelligence and Machine Learning Lab, Technische Universität Darmstadt.</p>
           </div>
         </article>
         <article class="timeline-item">
-          <span>Past</span>
+          <span>2023 - now</span>
           <div>
-            <h3>Education and experience</h3>
-            <p>按时间列出教育背景、研究经历、实习、教学或服务工作。</p>
+            <h3>M.Sc. Artificial Intelligence and Machine Learning</h3>
+            <p>Technische Universität Darmstadt. Coursework includes reinforcement learning, robot learning, computer vision, statistical machine learning, language technology and deep learning architectures.</p>
+          </div>
+        </article>
+        <article class="timeline-item">
+          <span>2021 - 2022</span>
+          <div>
+            <h3>Research Assistant, Bioinformatics</h3>
+            <p>Worked on phenotype analysis using TCGA data, GAN-based representation learning over mRNA and microRNA profiles, and SVM-based cancer type classification at Jilin University.</p>
+          </div>
+        </article>
+        <article class="timeline-item">
+          <span>2019 - 2023</span>
+          <div>
+            <h3>B.Sc. Computer Science and Technology</h3>
+            <p>Jilin University. Studied deep learning, machine learning, data structures, GPGPU computing, C/C++, software engineering and bioinformatics.</p>
+          </div>
+        </article>
+        <article class="timeline-item">
+          <span>2020 - 2022</span>
+          <div>
+            <h3>Bachelor Program in Finance</h3>
+            <p>Jilin University. Coursework included macroeconomics, microeconomics, corporate finance and public finance.</p>
           </div>
         </article>
       </div>
@@ -161,7 +212,7 @@
         <h2 id="contact-title">Let us talk about research.</h2>
       </div>
       <div class="contact-actions">
-        <a class="button button-primary" href="mailto:hello@example.com">Email <span aria-hidden="true">-&gt;</span></a>
+        <a class="button button-primary" href="mailto:teng.cao@stud.tu-darmstadt.de">Email <span aria-hidden="true">-&gt;</span></a>
         <a class="button button-secondary" href="https://scholar.google.com/citations?user=rGbSMkcAAAAJ&amp;hl=zh-CN" target="_blank" rel="noreferrer">Scholar <span aria-hidden="true">-&gt;</span></a>
         <a class="button button-secondary" href="https://github.com/caotengde">GitHub <span aria-hidden="true">-&gt;</span></a>
       </div>
