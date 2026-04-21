@@ -1,76 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="520" viewBox="0 0 1280 520" role="img" aria-labelledby="title desc">
-  <title id="title">Simplified flowchart for the COGS intervention sweep</title>
-  <desc id="desc">A flowchart summarizing the paper: pre-committed COGS attempts lead to diagnosis, probing, decoder interventions, structural wall tests, decomposition, and remaining structural decoder candidates.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">Flowchart for the COGS intervention sweep</title>
+  <desc id="desc">A polished flowchart showing the research protocol, diagnostic pivot, interventions, structural tests, and three-part decomposition.</desc>
   <defs>
     <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
       <path d="M2 2 L10 6 L2 10 Z" fill="#0a4f49"/>
     </marker>
-    <filter id="shadow" x="-8%" y="-12%" width="116%" height="130%">
-      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#172026" flood-opacity="0.12"/>
+    <filter id="cardShadow" x="-10%" y="-18%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#172026" flood-opacity="0.11"/>
     </filter>
     <style>
-      .bg{fill:#fbfaf6}
-      .box{fill:#fff;stroke:#d9dee2;stroke-width:2;rx:8;filter:url(#shadow)}
-      .box-accent{fill:#edf4f1;stroke:#0f766e;stroke-width:2;rx:8;filter:url(#shadow)}
-      .box-warm{fill:#fff8eb;stroke:#b9851b;stroke-width:2;rx:8;filter:url(#shadow)}
-      .title{font:700 22px Inter,Arial,sans-serif;fill:#172026}
-      .label{font:500 16px Inter,Arial,sans-serif;fill:#5d6872}
-      .small{font:700 13px Inter,Arial,sans-serif;fill:#b94b43}
-      .arrow{stroke:#0a4f49;stroke-width:3;fill:none;marker-end:url(#arrow)}
-      .split{stroke:#0a4f49;stroke-width:3;fill:none}
+      .page{fill:#fbfaf6}
+      .band{fill:#edf4f1}
+      .card{fill:#ffffff;stroke:#d9dee2;stroke-width:2;filter:url(#cardShadow)}
+      .card-teal{fill:#f6fbf9;stroke:#0f766e;stroke-width:2;filter:url(#cardShadow)}
+      .card-gold{fill:#fff8eb;stroke:#b9851b;stroke-width:2;filter:url(#cardShadow)}
+      .kicker{font:700 13px Inter,Arial,sans-serif;fill:#b94b43;letter-spacing:.5px}
+      .head{font:800 24px Inter,Arial,sans-serif;fill:#172026}
+      .sub{font:500 16px Inter,Arial,sans-serif;fill:#5d6872}
+      .section{font:800 30px Inter,Arial,sans-serif;fill:#172026}
+      .rule{stroke:#d9dee2;stroke-width:2}
+      .arrow{stroke:#0a4f49;stroke-width:3.5;fill:none;marker-end:url(#arrow)}
+      .hub{fill:#0f766e}
     </style>
   </defs>
-  <rect class="bg" width="1280" height="520"/>
 
-  <rect class="box-accent" x="50" y="78" width="200" height="116"/>
-  <text x="74" y="112" class="small">PROTOCOL</text>
-  <text x="74" y="143" class="title">Pre-committed</text>
-  <text x="74" y="169" class="label">23 COGS attempts</text>
+  <rect class="page" width="1280" height="720"/>
+  <rect class="band" x="0" y="0" width="1280" height="118"/>
+  <text x="64" y="54" class="kicker">SIMPLIFIED RESEARCH FLOW</text>
+  <text x="64" y="91" class="section">From aggregate COGS scores to a decomposed failure map</text>
 
-  <path class="arrow" d="M250 136 H315"/>
+  <rect class="card-teal" x="64" y="158" width="232" height="128" rx="8"/>
+  <text x="90" y="195" class="kicker">01 PROTOCOL</text>
+  <text x="90" y="229" class="head">Pre-commit</text>
+  <text x="90" y="255" class="sub">23 attempts</text>
 
-  <rect class="box" x="315" y="78" width="210" height="116"/>
-  <text x="339" y="112" class="small">DIAGNOSIS</text>
-  <text x="339" y="143" class="title">Aggregate Gen</text>
-  <text x="339" y="169" class="label">hides multiple failures</text>
+  <path class="arrow" d="M296 222 H355"/>
 
-  <path class="arrow" d="M525 136 H590"/>
+  <rect class="card" x="355" y="158" width="232" height="128" rx="8"/>
+  <text x="381" y="195" class="kicker">02 PROBLEM</text>
+  <text x="381" y="229" class="head">One score</text>
+  <text x="381" y="255" class="sub">many failure modes</text>
 
-  <rect class="box" x="590" y="78" width="220" height="116"/>
-  <text x="614" y="112" class="small">PROBE PIVOT</text>
-  <text x="614" y="143" class="title">Encoder has identity</text>
-  <text x="614" y="169" class="label">decoder fails to route it</text>
+  <path class="arrow" d="M587 222 H646"/>
 
-  <path class="arrow" d="M810 136 H875"/>
+  <rect class="card" x="646" y="158" width="232" height="128" rx="8"/>
+  <text x="672" y="195" class="kicker">03 PIVOT</text>
+  <text x="672" y="229" class="head">Probe encoder</text>
+  <text x="672" y="255" class="sub">identity is present</text>
 
-  <rect class="box-warm" x="875" y="78" width="230" height="116"/>
-  <text x="899" y="112" class="small">DECODER FIXES</text>
-  <text x="899" y="143" class="title">Copy + ALiBi</text>
-  <text x="899" y="169" class="label">lexical routing improves</text>
+  <path class="arrow" d="M878 222 H937"/>
 
-  <path class="split" d="M990 194 V248"/>
-  <path class="arrow" d="M990 248 H1010"/>
+  <rect class="card-gold" x="937" y="158" width="280" height="128" rx="8"/>
+  <text x="963" y="195" class="kicker">04 INTERVENTION</text>
+  <text x="963" y="229" class="head">Decoder routing</text>
+  <text x="963" y="255" class="sub">copy head and ALiBi</text>
 
-  <rect class="box" x="1010" y="216" width="220" height="116"/>
-  <text x="1034" y="250" class="small">WALL TESTS</text>
-  <text x="1034" y="281" class="title">Data, scale, depth</text>
-  <text x="1034" y="307" class="label">registered controls</text>
+  <path class="arrow" d="M1077 286 V352"/>
 
-  <path class="split" d="M1120 332 V378"/>
-  <path class="split" d="M210 378 H1120"/>
-  <path class="arrow" d="M210 378 V410"/>
-  <path class="arrow" d="M640 378 V410"/>
-  <path class="arrow" d="M1070 378 V410"/>
+  <rect class="card" x="474" y="352" width="332" height="120" rx="8"/>
+  <text x="504" y="389" class="kicker">05 REGISTERED CONTROLS</text>
+  <text x="504" y="423" class="head">Test the wall</text>
+  <text x="504" y="449" class="sub">data, scale, depth visibility</text>
 
-  <rect class="box-accent" x="70" y="410" width="280" height="82"/>
-  <text x="94" y="440" class="title">Cross-position PP</text>
-  <text x="94" y="466" class="label">distributional; fixed by synthesis</text>
+  <path class="arrow" d="M937 412 H806"/>
 
-  <rect class="box-accent" x="500" y="410" width="280" height="82"/>
-  <text x="524" y="440" class="title">Shallow recursion</text>
-  <text x="524" y="466" class="label">coverage plus capacity sensitive</text>
+  <circle class="hub" cx="640" cy="532" r="7"/>
+  <path class="rule" d="M640 472 V532"/>
+  <path class="rule" d="M200 532 H1080"/>
+  <path class="arrow" d="M200 532 V584"/>
+  <path class="arrow" d="M640 532 V584"/>
+  <path class="arrow" d="M1080 532 V584"/>
 
-  <rect class="box-warm" x="930" y="410" width="280" height="82"/>
-  <text x="954" y="440" class="title">Deep recursion residue</text>
-  <text x="954" y="466" class="label">needs structural decoder operations</text>
+  <rect class="card-teal" x="64" y="584" width="272" height="96" rx="8"/>
+  <text x="88" y="619" class="head">Distribution</text>
+  <text x="88" y="645" class="sub">Cross-position PP</text>
+  <text x="88" y="668" class="sub">fixed by synthesis</text>
+
+  <rect class="card-teal" x="504" y="584" width="272" height="96" rx="8"/>
+  <text x="528" y="619" class="head">Capacity</text>
+  <text x="528" y="645" class="sub">Shallow recursion</text>
+  <text x="528" y="668" class="sub">improves with scale</text>
+
+  <rect class="card-gold" x="944" y="584" width="272" height="96" rx="8"/>
+  <text x="968" y="619" class="head">Residue</text>
+  <text x="968" y="645" class="sub">Deep recursion</text>
+  <text x="968" y="668" class="sub">needs structure</text>
 </svg>
