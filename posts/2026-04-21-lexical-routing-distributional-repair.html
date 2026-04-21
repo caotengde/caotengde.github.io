@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lexical Routing, Distributional Repair, and a Recursive-Depth Residue | Teng Cao</title>
+  <meta name="description" content="A draft essay on a twenty-three-attempt sweep of small transformers on COGS, decomposing lexical routing, distributional repair and deep recursive generalization.">
+  <link rel="canonical" href="https://caotengde.github.io/posts/2026-04-21-lexical-routing-distributional-repair.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header compact" data-header>
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true">TC</span>
+      <span>Teng Cao</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="../index.html#research">Research</a>
+      <a href="../index.html#projects">Projects</a>
+      <a href="../index.html#publications">Publications</a>
+      <a href="../blog.html">Notes</a>
+      <a href="https://scholar.google.com/citations?user=rGbSMkcAAAAJ&amp;hl=zh-CN" target="_blank" rel="noreferrer">Scholar</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main class="article-main wide-article">
+    <article class="article">
+      <p class="note-date">Draft</p>
+      <h1 id="lexical-routing-distributional-repair-and-a-recursive-depth-residue">Lexical Routing, Distributional Repair, and a Recursive-Depth Residue</h1>
+<h3 id="a-pre-committed-twenty-three-attempt-sweep-of-small-transformers-on-cogs">A Pre-Committed Twenty-Three-Attempt Sweep of Small Transformers on COGS</h3>
+<p><em>Draft — not yet formatted for submission.</em></p>
+<hr>
+<h2 id="1-introduction">1. Introduction</h2>
+<p>Architectural interventions for compositional generalization in small transformers are difficult to interpret from aggregate accuracy alone. On COGS, SCAN, and related benchmarks, a single Gen number can rise because a model learned lexical copying, because a held-out syntactic position became covered by the training distribution, or because it genuinely learned a recursive rule. Those are different mechanisms, but they are often reported as the same kind of "compositional generalization" improvement.</p>
+<p>This paper imposes a deliberately narrow protocol on that problem. We use COGS as the benchmark, keep a small Transformer seq2seq family as the base model, and require every intervention to register numerical thresholds before training. Each attempt has a <code>plan.md</code> written before the run, a <code>findings.md</code> written after the run, and a verdict recorded in a public ledger. Post-hoc interpretation is allowed, but it is explicitly marked as post-hoc and can be overturned by later pre-committed controls.</p>
+<p>Across twenty-three attempts, the benchmark decomposes into three distinct failure modes.</p>
+<p>First, <strong>encoder representation is not the bottleneck for lexical identity</strong>. A linear probe on frozen encoders from attempts 03/05/06/07 recovers proper-noun token identity at 99.1-99.4%, while the same models' end-to-end proper-noun Gen accuracy remains near 50-55%. The information is present in the encoder; the decoder fails to route it.</p>
+<p>Second, <strong>lexical routing is architecturally fixable on the decoder side</strong>. A pointer-generator copy head in attempt 08 moves the proper-noun axis by +16.5 percentage points off a seven-attempt plateau. Replacing learned positional embeddings with ALiBi in attempt 09 does not solve the registered structural hypothesis, but it triggers a post-hoc copy-gate regime shift: function-word gates collapse from roughly 0.82 to 0.06, and proper-noun accuracy rises again to 82.2%. These are real wins, but only on lexical routing.</p>
+<p>Third, <strong>the COGS structural wall is not one wall</strong>. The early architectural sweep leaves <code>pp_recursion</code>, <code>cp_recursion</code>, and <code>obj_pp_to_subj_pp</code> at or near zero, and attempt 10 rules out length clipping as the obvious hyperparameter confound. Subsequent pre-committed data, scale, and depth-aware decoder interventions split the wall into three components:</p>
+<ul>
+<li><code>obj_pp_to_subj_pp</code> is distributional. It stays at 0% through attempt 13, then rises to 80.4% in attempt 14 after adding only 1600 subject-PP synthetic examples. The fix is stable at 1.2M and 10M parameters.</li>
+<li>Shallow-to-mid recursion within trained depth support is capacity-sensitive. Coverage scaling alone at 1.2M does not help, but adding targeted synthesis and scaling to 10M lifts <code>pp_recursion</code> from 0.12 to 0.17 with low variance.</li>
+<li>Deep recursion past roughly depth 6 is an operational decoder problem in this model family. Attempt 18 gives the 10M model direct synthetic training at depths 7-9, yet PP d9 and CP d9 remain exactly 0.000 across all seeds. Attempts 19-23 then rule out explicit input depth features, another 4x scale increase to 32M, decoder self-attention depth bias in both substitutive and additive forms, and bracketed output LFs. Making depth visible in the input, attention mask, or output stream is not enough. The remaining candidate is a decoder with structural operations: tree decoding, stack augmentation, production-rule emission, or a pointer mechanism tied to open modifiers. The contribution is therefore not a state-of-the-art COGS score. It is a pre-committed decomposition. Aggregate Gen hides the fact that lexical routing, cross-position coverage, shallow recursive templates, and deep recursive emission respond to different interventions. The protocol matters because it turns both wins and nulls into evidence: a post-hoc ALiBi win is reported as post-hoc, a length-clipping worry becomes a registered control, and a tempting "just give the model depth" hypothesis is closed by three separate negative interventions.</li>
+</ul>
+<h3 id="contributions">Contributions</h3>
+<ul>
+<li>A twenty-three-attempt pre-committed COGS sweep, spanning encoder-side factorization, decoder-side copy and positional interventions, targeted data synthesis, scale controls at 1.2M/10M/32M parameters, depth-aware attention variants, and bracketed output targets.</li>
+<li>A probe-driven pivot showing that proper-noun identity is already linearly recoverable from the encoder, localizing the lexical-routing bottleneck to the decoder.</li>
+<li>Two decoder-side lexical-routing wins: pointer-generator copy for proper nouns and ALiBi plus copy-gate regime shift for function words.</li>
+<li>A structural-wall decomposition: cross-position PP transfer is distributional and fixed by 1600 targeted examples; shallow depth recursion is coverage-plus-capacity sensitive; deep recursion remains unsolved under explicit depth supervision, explicit depth features, 32M scale, depth-aware decoder self-attention, and bracketed LF output.</li>
+<li>A public record of the protocol correcting the research story: post-hoc claims are marked, retractions are preserved, and later pre-committed controls update the interpretation rather than being hidden.</li>
+</ul>
+<h2 id="2-related-work">2. Related work</h2>
+<p><strong>Compositional generalization benchmarks.</strong> SCAN [Lake &amp; Baroni 2018] and COGS [Kim &amp; Linzen 2020] are the two most common small-transformer compositional-generalization benchmarks. SCAN's <code>add_prim_jump</code> split has been saturated at ≥98% by CGPS [Li et al. 2019], NeSS [Chen et al. 2020], LANE [Liu et al. 2020], NSR [Nye et al. 2020], Meta-Seq2Seq [Lake 2019], and MLC [Lake &amp; Baroni 2023]; we treated it as a diagnostic rather than a target. COGS is less saturated and maintains non-trivial gaps between IID and Gen across model sizes. gSCAN [Ruis et al. 2020] and CFQ-MCD [Keysers et al. 2020] probe complementary failure modes and are out of scope for this program.</p>
+<p><strong>Copy and pointer mechanisms.</strong> See et al. [2017] introduced pointer-generator networks for abstractive summarization, combining <code>p_vocab</code> and <code>p_copy</code> via a learned gate. Copy has since been adopted widely for tasks with input/output vocabulary overlap. Its direct application to compositional-generalization benchmarks for proper-noun handling is standard folklore but rarely tested in controlled ablation. Our attempt 08 is a clean registration of that test.</p>
+<p><strong>Relative and ALiBi position encodings.</strong> Shaw et al. [2018] introduced relative attention biases; Press et al. [2022] (ALiBi) proposed a linear-decay per-head additive bias with no learned parameters. Its primary advertised benefit is length extrapolation. Our attempt 09 registered ALiBi as an intervention for structural generalization (the wrong hypothesis, in retrospect) and recovered a different, unregistered win on function-word routing (Section 6.3).</p>
+<p><strong>Structured and tree decoders.</strong> Herzig &amp; Berant [2021] introduced a grammar-constrained decoder that achieves strong COGS performance by emitting LF productions rather than flat tokens. Chen et al. [2020] (NeSS) and Nye et al. [2020] (NSR) use explicit symbolic or neuro-symbolic structure. We do not include a full tree, stack, or production-rule decoder in this program. After attempts 19-23 rule out several "make depth visible" interventions, these structural-operation decoders become the main remaining candidate for the deep-recursion residue.</p>
+<p><strong>Data-augmentation approaches.</strong> GECA [Andreas 2020] synthesizes training examples by composing substructures from the training set, addressing compositional generalization at the data-distribution level rather than the architecture level. Attempts 11-15 test narrow GECA-like synthesis rather than full GECA: depth-tail synthesis for PP/CP recursion, cross-position subject-PP synthesis, and their combination. The contrast between attempts 13 and 14 is central to our decomposition: more depth coverage does not solve deep recursion, while a small targeted cross-position augmentation solves <code>obj_pp_to_subj_pp</code>.</p>
+<p><strong>Mechanistic interpretation and probing.</strong> Linear probes on hidden states are a standard mechanistic-interpretability tool (Belinkov &amp; Glass 2019; Elazar et al. 2021). Probing as a <em>protocol gate</em> — used to decide whether to continue an architectural research line — appears less often; our attempt-07-to-08 pivot (Section 4) exemplifies that use.</p>
+<p><strong>Pre-registered / falsifiable ML research.</strong> Pre-registration and pre-committed thresholds are common in medicine and increasingly discussed in ML (Gencoglu et al. 2019; Ulmer et al. 2022). Our protocol is a specific lightweight instantiation: each attempt gets a <code>plan.md</code> file committed before training, and a <code>findings.md</code> file that references it; verdicts are tracked in a public ledger (<code>ATTEMPTS.md</code>). We do not claim originality for the methodology. We claim that running it at twenty-three-attempt depth on one benchmark produces a cleaner decomposition than aggregate-score reporting usually permits.</p>
+<h2 id="3-methodology">3. Methodology</h2>
+<h3 id="3-1-pre-commit-protocol">3.1 Pre-commit protocol</h3>
+<p>Every attempt follows the same lightweight pre-commit protocol.</p>
+<ol>
+<li><strong>Plan.</strong> Before training starts, a <code>plan.md</code> states the hypothesis, intervention, expected failure modes, and numerical thresholds. The pass rule is registered in the plan rather than chosen after results are observed.</li>
+<li><strong>Train.</strong> A short sanity run checks numerical stability. Full runs use three seeds (42, 43, 44) unless explicitly marked otherwise.</li>
+<li><strong>Evaluate.</strong> We evaluate IID dev accuracy, full COGS Gen accuracy, all 21 Gen categories, and the registered diagnostic slices for that attempt (for example per-depth PP/CP recursion in attempts 12-23).</li>
+<li><strong>Record.</strong> A <code>findings.md</code> records observed values against the registered thresholds. Post-hoc interpretation is allowed only if marked as post-hoc; later controls can retract or refine it. This protocol is intentionally modest. Its value is not that it prevents all researcher degrees of freedom, but that it makes the main ones visible: which hypothesis was actually tested, which thresholds were registered, and which later claims were not predicted.</li>
+</ol>
+<h3 id="3-2-benchmark">3.2 Benchmark</h3>
+<p>We use COGS [Kim &amp; Linzen, 2020]. The training split has 24,155 examples. The IID <code>dev</code> split has 3,000 examples. The Gen split has 21,000 examples across 21 categories.</p>
+<p>Three Gen categories are central to the paper:</p>
+<ul>
+<li><code>cp_recursion</code>: deeper clausal embedding than appears in training.</li>
+<li><code>pp_recursion</code>: deeper PP chains than appear in training.</li>
+<li><code>obj_pp_to_subj_pp</code>: PP modifiers are seen on object position in training and tested on subject position. The Gen split reaches 61 input tokens and 480 LF tokens. Early attempts used <code>max_in=25</code> and <code>max_out=150</code>; attempt 10 is the pre-committed control that raises these to 80/500 and rules out truncation as the source of the recursion failures. For aggregate reporting we group categories into four axes: Proper, Common, Structural (<code>pp_recursion</code>, <code>cp_recursion</code>, <code>obj_pp_to_subj_pp</code>), and Other. For the later recursion experiments, aggregate Structural is too coarse, so we report per-depth PP/CP accuracy.</li>
+</ul>
+<h3 id="3-3-model-families">3.3 Model families</h3>
+<p>The initial COGS sweep uses a small pre-norm Transformer seq2seq backbone:</p>
+<table>
+<thead><tr><th>Component</th><th>Base value</th></tr></thead>
+<tbody>
+<tr><td>d_model</td><td>128</td></tr>
+<tr><td>heads</td><td>4</td></tr>
+<tr><td>encoder layers</td><td>2</td></tr>
+<tr><td>decoder layers</td><td>2</td></tr>
+<tr><td>parameters</td><td>roughly 1.2M</td></tr>
+<tr><td>optimizer</td><td>AdamW</td></tr>
+<tr><td>training steps</td><td>usually 30,000</td></tr>
+<tr><td>seeds</td><td>42, 43, 44</td></tr>
+</tbody></table>
+<p>Later scale controls use the same model family at larger sizes:</p>
+<table>
+<thead><tr><th>Attempts</th><th>Scale</th><th>Main changes</th></tr></thead>
+<tbody>
+<tr><td>03-15</td><td>1.2M</td><td>2+2 layers, d_model 128, 4 heads</td></tr>
+<tr><td>16-19, 21-23</td><td>10M</td><td>4+4 layers, d_model 256, 8 heads</td></tr>
+<tr><td>20</td><td>32M</td><td>d_model 512, 16 heads, same 4+4 depth</td></tr>
+</tbody></table>
+<p>The main decoder-side backbone after attempt 09 is ALiBi self-attention plus a pointer-generator copy head. Attempts 18-23 keep this backbone fixed while testing deeper supervision, explicit depth features, scale, depth-aware decoder attention, and bracketed output targets.</p>
+<h3 id="3-4-attempt-catalogue">3.4 Attempt catalogue</h3>
+<table>
+<thead><tr><th>#</th><th>Intervention</th><th>Role in the paper</th></tr></thead>
+<tbody>
+<tr><td>01-02</td><td>SCAN encoder-side factorization controls</td><td>Early nulls; motivate switching to COGS</td></tr>
+<tr><td>03</td><td>COGS baseline</td><td>Establishes 59.87% Gen baseline</td></tr>
+<tr><td>04-07</td><td>Typed cross-attention, aux losses, combo, asymmetric factorization</td><td>Encoder-side line; fails to move proper nouns</td></tr>
+<tr><td>probe_01</td><td>Linear probe on attempts 03/05/06/07 encoders</td><td>Shows proper-noun identity is already recoverable at 99%</td></tr>
+<tr><td>08</td><td>Pointer-generator copy</td><td>First lexical-routing win; proper axis 50% plateau to 66%</td></tr>
+<tr><td>09</td><td>ALiBi + pointer-generator</td><td>Registered structural hypothesis fails; post-hoc function-word copy win</td></tr>
+<tr><td>10</td><td>Raised sequence limits</td><td>Rules out length clipping</td></tr>
+<tr><td>11-13</td><td>Depth synthesis, canonical-LF fix, coverage scaling</td><td>Shows depth coverage is necessary but not sufficient</td></tr>
+<tr><td>14</td><td>Subject-PP cross-position synthesis</td><td>Solves <code>obj_pp_to_subj_pp</code> with 1600 examples</td></tr>
+<tr><td>15</td><td>Combined depth + subject-PP synthesis</td><td>Shows wall-axis data interventions compose</td></tr>
+<tr><td>16-17</td><td>10M scale ablation and pre-committed 22k replay</td><td>Shows in-support depth recursion is capacity-sensitive</td></tr>
+<tr><td>18</td><td>Synthesis extended to depths 7-9</td><td>Shows direct deep supervision still leaves d9 at 0</td></tr>
+<tr><td>19</td><td>Input-side learned depth feature</td><td>Rules out the input-representation-gap hypothesis</td></tr>
+<tr><td>20</td><td>32M scale control</td><td>Rules out a simple log-linear scale continuation</td></tr>
+<tr><td>21</td><td>Decoder depth-attention head replacement</td><td>Rules out one self-attention depth-bias formulation</td></tr>
+<tr><td>22</td><td>Additive decoder depth-attention bias</td><td>Rules out the cleaner additive formulation</td></tr>
+<tr><td>23</td><td>Bracketed LF output</td><td>Rules out minimum-invasive output-side depth visibility</td></tr>
+</tbody></table>
+<h3 id="3-5-probing">3.5 Probing</h3>
+<p>Between attempts 07 and 08 we ran a linear probe on frozen encoder hidden states from attempts 03, 05, 06, and 07. For each token position, the probe predicts input token identity from the final encoder state. Proper-noun identity is recoverable at 99.1-99.4% across all variants, including models whose end-to-end proper-noun Gen accuracy is only 50-55%. This result stops the encoder-factorization line and redirects the program to decoder-side interventions.</p>
+<h3 id="3-6-what-we-do-not-claim">3.6 What we do not claim</h3>
+<ul>
+<li>We do not claim state-of-the-art COGS performance. The highest aggregate Gen in this program comes from targeted subject-PP synthesis, not a new general architecture.</li>
+<li>We do not claim that no model can learn deep recursion. Our claim is narrower: in this Transformer seq2seq family, under the registered interventions and scales tested here, deep PP/CP recursion remains at the floor even under direct depth-7-to-9 supervision.</li>
+<li>We do not claim that pre-commit protocols are sufficient for all ML research. We claim that this protocol made the failure modes legible and prevented post-hoc wins from being confused with registered hypotheses.</li>
+</ul>
+<h2 id="4-the-probing-pivot">4. The probing pivot</h2>
+<p>After seven attempts (01–07) that applied encoder-side factorization, the proper-noun generalization axis remained stuck at ~50% across every variant. The pattern was consistent: common nouns moved (50% baseline → 87% combo) while proper nouns did not (55% baseline → 50% combo). We needed to know whether the encoder was losing information about proper-noun identity in compositional contexts, or whether the information was present but not being routed through the decoder.</p>
+<h3 id="4-1-setup">4.1 Setup</h3>
+<p>We took frozen encoder checkpoints from attempts 03 (baseline), 05 (aux-loss), 06 (combo), and 07 (asymmetric) — three seeds each, twelve checkpoints total. On IID-dev, for every token position, we trained a linear probe to predict input token identity (749-way classification) from the encoder's last-layer hidden state. We broke results out by token class (proper, common, function, structural), holding everything else constant.</p>
+<h3 id="4-2-result">4.2 Result</h3>
+<table>
+<thead><tr><th>Variant</th><th>Proper-noun probe</th><th>Common-noun probe</th><th>End-to-end proper Gen</th></tr></thead>
+<tbody>
+<tr><td>Baseline (03)</td><td>99.14% ± 0.26</td><td>98.27% ± 0.31</td><td>55.18%</td></tr>
+<tr><td>Aux-loss (05)</td><td>99.26% ± 0.35</td><td>98.04% ± 0.21</td><td>55.68%</td></tr>
+<tr><td>Combo (06)</td><td>99.18% ± 0.25</td><td>98.17% ± 0.38</td><td>50.07%</td></tr>
+<tr><td>Asymmetric (07)</td><td>99.43% ± 0.15</td><td>98.38% ± 0.41</td><td>49.54%</td></tr>
+</tbody></table>
+<p>Proper-noun token identity is linearly recoverable from every variant's encoder at 99.1–99.4%, while that same variant's end-to-end proper-noun generalization accuracy sits at 50–55%. The 44–50 percentage-point gap is entirely in the decoder pathway.</p>
+<p>The embedding layer alone — <em>before any encoder layers</em> — already recovers 99.22% proper-noun identity. The encoder's two layers neither add nor remove identity information for this task. Every encoder-side factorization we tried was trying to fix something that was not broken.</p>
+<h3 id="4-3-consequence">4.3 Consequence</h3>
+<p>This result closed out the encoder-factorization line. We stopped testing encoder-side interventions and pivoted to decoder-side ones:</p>
+<ul>
+<li>Decoder cross-attention routing (addressed by pointer-generator copy in attempt 08)</li>
+<li>Decoder output distribution shaping (addressed by ALiBi + gate regime in attempt 09) In retrospect, the probe also explains why attempts 01–07 produced mostly marginal movement. Attempt 05's aux-loss was "first non-null" at +3pp, but the probe suggests the loss was not enforcing a representational structure — it was already satisfied at the encoder. The improvement likely came from a side-effect on decoder attention patterns, not from encoder capacity reallocation. Had we run the probe first, we would have skipped attempts 04, 06, and 07 entirely and saved ~300 GPU-min. The probe is a small experiment (~30 GPU-min, 12 checkpoints, one linear classifier). Its role in the research program was disproportionate: one well-aimed probe redirected every attempt that followed.</li>
+</ul>
+<h2 id="5-win-1-pointer-generator-copy-unblocks-proper-noun-routing">5. Win 1 — Pointer-generator copy unblocks proper-noun routing</h2>
+<p>Attempt 08 added a See et al. (2017) pointer-generator decoder head to the attempt 03 baseline. At each decoder step, the model computes two distributions over the output vocabulary:</p>
+<ul>
+<li><code>p_vocab(t)</code>: the standard softmax over the output vocabulary</li>
+<li><code>p_copy(t)</code>: aggregated cross-attention weights placed on input positions whose token is <code>t</code> and combines them via a learned gate <code>g ∈ [0, 1]</code>: <code>p_final(t) = g · p_vocab(t) + (1 − g) · p_copy(t)</code> For COGS the intersection between input and output vocabularies is substantial: 601 of 749 input-vocabulary tokens are also valid output tokens (80.2%). Proper nouns, common nouns, and function words are all copyable; LF operators (<code>AND</code>, <code>x_k</code>, <code>agent</code>, etc.) are not.</li>
+</ul>
+<h3 id="5-1-pre-commit-predictions">5.1 Pre-commit predictions</h3>
+<table>
+<thead><tr><th>Criterion</th><th>Threshold</th></tr></thead>
+<tbody>
+<tr><td>Proper-axis mean ≥ 65%</td><td>+9pp over the 50% plateau</td></tr>
+<tr><td>Common-axis mean ≥ 70%</td><td>No regression</td></tr>
+<tr><td>Gen aggregate ≥ 66%</td><td>Clear win over combo (63.73%)</td></tr>
+<tr><td>Gate&lt;0.3 on proper, ≈1 on LF operators</td><td>Copy actually engaged</td></tr>
+</tbody></table>
+<h3 id="5-2-results-3-seeds">5.2 Results (3 seeds)</h3>
+<table>
+<thead><tr><th>Metric</th><th>Attempt 03</th><th>Attempt 06 (combo)</th><th><strong>Attempt 08 (ptrgen)</strong></th></tr></thead>
+<tbody>
+<tr><td>IID dev</td><td>99.26%</td><td>99.30%</td><td>99.29%</td></tr>
+<tr><td>Gen aggregate</td><td>59.87% ± 6.7</td><td>63.73% ± 1.9</td><td><strong>64.25% ± 3.7</strong></td></tr>
+<tr><td>Proper axis</td><td>55.18%</td><td>50.07%</td><td><strong>66.47% ± 11.7</strong></td></tr>
+<tr><td>Common axis</td><td>58.42%</td><td>87.22%</td><td><strong>93.31% ± 2.8</strong></td></tr>
+<tr><td>Common – Proper gap</td><td>3.2pp</td><td>37.2pp</td><td>26.8pp</td></tr>
+</tbody></table>
+<p>The proper-noun axis moved +16.5pp off its seven-attempt plateau. This was the first intervention in the program to do so. The common axis continued to improve (+6pp over combo). Gen aggregate moved only +0.5pp over combo because three zero-progress structural categories (Section 7) bound it below ~70%.</p>
+<p>Pre-commit verdict: <strong>2 of 4 pass (proper axis, common axis; gen aggregate missed by 1.75pp; gate magnitudes compressed rather than collapsed)</strong>. We record this as PARTIAL rather than PASS, while noting that the criterion it did hit — proper-axis movement — was the specific bottleneck the probe diagnosed.</p>
+<h3 id="5-3-gate-behavior">5.3 Gate behavior</h3>
+<p>Gate means by token class on IID dev, averaged across seeds:</p>
+<table>
+<thead><tr><th>Class</th><th>Gate</th><th>Interpretation</th></tr></thead>
+<tbody>
+<tr><td>Structural (<code>x_k</code>, <code>AND</code>, <code>agent</code>, ...)</td><td>1.000</td><td>Pure vocab — correct, no copy available</td></tr>
+<tr><td>Special (BOS/EOS/PAD)</td><td>1.000</td><td>Pure vocab — correct</td></tr>
+<tr><td>Common nouns</td><td>0.850</td><td>Mild copy use</td></tr>
+<tr><td>Proper nouns</td><td>0.778</td><td>Most copy-reliant class — but far from pure copy</td></tr>
+<tr><td>Function words</td><td>0.824</td><td>Mild copy use</td></tr>
+</tbody></table>
+<p>The gate learned the <em>right ordering</em> — structural &gt; function &gt; common &gt; proper — but the magnitudes are compressed. The model prefers a hybrid over pure copy, even for proper nouns. This is consistent with the decoder having learned <em>some</em> signal for proper-noun vocab prediction that it trusts slightly more than copy. A pure-pointer ablation (force g=0 for proper nouns at inference) would test whether the hybrid is necessary or a local optimum; we did not run it.</p>
+<h3 id="5-4-seed-variance">5.4 Seed variance</h3>
+<p>One of three seeds (s44) collapsed to 58–61% on two proper-noun categories while the other two seeds stayed above 95%. The standard deviation on the proper axis is 11.7pp — the worst variance we observed on that axis in the original architectural sweep. The copy mechanism works reliably in most runs but admits a basin of attraction where the gate never learns to favor copy for held-out proper nouns.</p>
+<h3 id="5-5-what-attempt-08-shows">5.5 What attempt 08 shows</h3>
+<p>The copy mechanism is a decoder-side intervention that targets exactly the bottleneck the probe identified: information present in the encoder was not being routed to the decoder output for proper nouns. Copy provides a second path from input to output that bypasses the standard cross-attention → vocab-softmax pipeline. It moves the proper-noun axis by +16.5pp from a seven-attempt plateau.</p>
+<p>This is our first win. It does not touch the structural axis (Section 7).</p>
+<h2 id="6-win-2-alibi-removes-a-pe-gate-coupling-we-didn-t-know-existed">6. Win 2 — ALiBi removes a PE–gate coupling we didn't know existed</h2>
+<p>Attempt 09 modified the attempt 08 pointer-generator by replacing learned positional embeddings with ALiBi [Press et al. 2022] — a per-head linear additive attention bias <code>−m_h · |i − j|</code> applied before softmax — and removing positional-embedding parameters entirely. Self-attention in both encoder and decoder used ALiBi; cross-attention was left unchanged (no PE between encoder and decoder positions).</p>
+<h3 id="6-1-pre-commit-predictions">6.1 Pre-commit predictions</h3>
+<p>The registered hypothesis was about <em>structural</em> generalization: "relative/rotary/ALiBi positional bias … enables length-extrapolative index assignment in the LF." We expected cp_recursion and pp_recursion to move from 0–3% toward 20%+ because the model would no longer conflate "index value x_5" with "absolute decoder position 5."</p>
+<table>
+<thead><tr><th>Criterion</th><th>Threshold</th></tr></thead>
+<tbody>
+<tr><td><code>pp_recursion</code> mean ≥ 20%</td><td>+17pp over 3% plateau</td></tr>
+<tr><td><code>cp_recursion</code> mean ≥ 10%</td><td>+10pp over 0% plateau</td></tr>
+<tr><td><code>obj_pp_to_subj_pp</code> mean ≥ 10%</td><td>+10pp over 0% plateau</td></tr>
+<tr><td>Gen aggregate ≥ 68%</td><td>+3.75pp over attempt 08</td></tr>
+<tr><td>Proper axis ≥ 60%</td><td>No regression from attempt 08</td></tr>
+<tr><td>IID dev ≥ 98%</td><td>Sanity</td></tr>
+</tbody></table>
+<h3 id="6-2-results-3-seeds">6.2 Results (3 seeds)</h3>
+<table>
+<thead><tr><th>Metric</th><th>Attempt 08</th><th><strong>Attempt 09</strong></th></tr></thead>
+<tbody>
+<tr><td>IID dev</td><td>99.29%</td><td><strong>99.56%</strong></td></tr>
+<tr><td>Gen aggregate</td><td>64.25% ± 3.7</td><td><strong>68.84% ± 7.0</strong></td></tr>
+<tr><td>Proper axis</td><td>66.47% ± 11.7</td><td><strong>82.23% ± 3.5</strong></td></tr>
+<tr><td>Common axis</td><td>93.31% ± 2.8</td><td>90.36% ± 10.6</td></tr>
+<tr><td><code>pp_recursion</code></td><td>2.9%</td><td><strong>1.17%</strong></td></tr>
+<tr><td><code>cp_recursion</code></td><td>0.0%</td><td><strong>0.0%</strong></td></tr>
+<tr><td><code>obj_pp_to_subj_pp</code></td><td>0.0%</td><td><strong>0.0%</strong></td></tr>
+</tbody></table>
+<p>The three <em>registered</em> (structural) criteria all failed. Gen aggregate passed. Proper axis passed with a large margin. IID passed. <strong>3 of 6 pass → pre-commit verdict REJECTED on core claim.</strong></p>
+<p>And yet: seed 43 hit 76.69% Gen — the best single-run result in the original architectural sweep. Proper axis rose another +15.8pp on top of attempt 08. Something worked, just not what we registered.</p>
+<h3 id="6-3-finding-the-mechanism">6.3 Finding the mechanism</h3>
+<p>Post-hoc inspection of the gate statistics revealed the unregistered win:</p>
+<table>
+<thead><tr><th>Token class</th><th>Attempt 08 gate</th><th><strong>Attempt 09 gate</strong></th></tr></thead>
+<tbody>
+<tr><td>Structural (<code>x_k</code>, <code>AND</code>, <code>agent</code>, ...)</td><td>1.00</td><td>1.00</td></tr>
+<tr><td>Proper nouns</td><td>0.78</td><td>0.59</td></tr>
+<tr><td>Common nouns</td><td>0.85</td><td>0.62</td></tr>
+<tr><td><strong>Function words (<code>the</code>, <code>to</code>, <code>in</code>, ...)</strong></td><td><strong>0.82</strong></td><td><strong>≈0.06</strong></td></tr>
+</tbody></table>
+<p>Function-word gates <em>collapsed</em> to near-zero under ALiBi — they are now copy-dominant rather than vocab-dominant. This did not happen in attempt 08 even though attempt 08 had the same copy mechanism. Attempt 09's only other change was removing the learned PE and replacing it with ALiBi.</p>
+<p>We interpret this as follows. In the learned-PE model, the absolute position of a function word (<code>the</code> usually appears near position 1 or 2, etc.) is entangled with its embedding signal. The vocab-softmax path could predict function words partly from PE, giving it a slight edge that held the gate above 0.8. When ALiBi removed the PE, the vocab path lost that edge, and the gate settled on copy — which is robust to position shifts between training and test. Function words in held-out sentences appear at positions the model has never seen, so copy-from-source is a strictly better policy.</p>
+<h3 id="6-4-attribution-of-the-4-6pp-aggregate-lift">6.4 Attribution of the +4.6pp aggregate lift</h3>
+<p>Attempt 09's +4.6pp Gen improvement over attempt 08 decomposes approximately as:</p>
+<ul>
+<li>Proper axis +15.8pp × 4/21 categories = +3.0pp contribution to Gen</li>
+<li>Function-word-driven improvement on "Other" categories (mostly prim_to_inf_arg +4pp and compositional-generalization contexts where function-word copy matters) ≈ +2pp</li>
+<li>Common axis regression and continued structural-gen failure: ≈ −0.4pp net The function-word effect is not isolated to any single "Other" category — it shows up as a distributed ~0.5pp lift on several.</li>
+</ul>
+<h3 id="6-5-interpretation">6.5 Interpretation</h3>
+<p>What we registered as a structural-generalization hypothesis became, in practice, a lexical-routing win on a token class we had not been thinking about. The pre-commit protocol marked it REJECTED, correctly: we did not achieve what we claimed we would. The post-hoc story in this section is our best current account of what <em>did</em> happen, but it is not a pre-registered finding. We flag this clearly because it illustrates the protocol's intended role — separating what the evidence supports from what we wish it supported.</p>
+<p>A subsequent attempt that pre-registers "ALiBi makes the gate copy-dominant for function words" would be a cleaner test. We did not run that attempt.</p>
+<h3 id="6-6-what-attempt-09-shows">6.6 What attempt 09 shows</h3>
+<p>Two decoder-side interventions now yield two orthogonal lexical-routing wins:</p>
+<ul>
+<li>Attempt 08 (copy mechanism): primarily helps proper-noun generalization. Proper axis 50% → 66%.</li>
+<li>Attempt 09 (ALiBi interacting with the existing copy gate): additionally helps function-word routing. Proper axis 66% → 82%; Gen 64% → 69%. Neither attempt moves the structural axis — the subject of Section 7.</li>
+</ul>
+<h2 id="7-the-structural-generalization-wall">7. The structural-generalization wall</h2>
+<p>The early architectural sweep made three COGS categories look like a single flat wall:</p>
+<ul>
+<li><code>cp_recursion</code> — deeper clausal embedding than training ("Emma knew that Liam knew that …")</li>
+<li><code>pp_recursion</code> — deeper PP chains than training ("the cat on the mat in the box on …")</li>
+<li><code>obj_pp_to_subj_pp</code> — PP-modifier trained on object position, tested on subject position The later attempts show that this grouping is misleading. The categories share low early accuracy, but they respond to different interventions. Per-attempt means over three seeds:</li>
+</ul>
+<table>
+<thead><tr><th>Attempt</th><th>Variant</th><th><code>pp_recursion</code></th><th><code>cp_recursion</code></th><th><code>obj_pp_to_subj_pp</code></th></tr></thead>
+<tbody>
+<tr><td>03</td><td>baseline</td><td>0.03</td><td>0.00</td><td>0.00</td></tr>
+<tr><td>04</td><td>typed_cross</td><td>0.02</td><td>0.00</td><td>0.00</td></tr>
+<tr><td>05</td><td>aux-loss</td><td>0.02</td><td>0.00</td><td>0.00</td></tr>
+<tr><td>06</td><td>combo</td><td>0.02</td><td>0.00</td><td>0.00</td></tr>
+<tr><td>07</td><td>asymmetric</td><td>0.03</td><td>0.00</td><td>0.00</td></tr>
+<tr><td>08</td><td>ptrgen</td><td>0.03</td><td>0.00</td><td>0.00</td></tr>
+<tr><td>09</td><td>alibi_ptrgen</td><td>0.01</td><td>0.00</td><td>0.00</td></tr>
+<tr><td>10</td><td>alibi_ptrgen_long</td><td>0.002</td><td>0.00</td><td>0.00</td></tr>
+<tr><td>11</td><td>alibi_ptrgen + GECA-lite depth-3..6 synth</td><td>0.07</td><td>0.00</td><td>0.00</td></tr>
+<tr><td>12</td><td>= 11 with canonical-LF fix</td><td>0.09</td><td>0.06</td><td>0.00</td></tr>
+<tr><td>13</td><td>= 12 with coverage 800→2500/depth (20k synth)</td><td>0.06</td><td>0.06</td><td>0.00</td></tr>
+<tr><td>14</td><td>+ 1600 subject-PP synth (depth 1–2)</td><td>0.03</td><td>0.00</td><td><strong>0.80</strong></td></tr>
+<tr><td>15</td><td>a12 depth synth + a14 subject-PP synth (8000 total)</td><td><strong>0.12</strong></td><td>0.06</td><td><strong>0.84</strong></td></tr>
+<tr><td>16</td><td>a15 synth at 8× scale (10M params, 30k steps; final)</td><td><strong>0.19</strong></td><td>0.07</td><td>0.79</td></tr>
+<tr><td>16</td><td>a15 synth at 8× scale (10M params; per-seed peak, post-hoc)</td><td><strong>0.21</strong></td><td><strong>0.11</strong></td><td>0.81</td></tr>
+<tr><td>17</td><td>a16 pre-committed replay (10M params, 22k steps)</td><td><strong>0.17</strong> <em>(pre-committed best)</em></td><td>0.06</td><td><strong>0.84</strong></td></tr>
+<tr><td>18</td><td>a17 + explicit d3..d9 depth synth (10M, 22k)</td><td><strong>0.17</strong></td><td>0.07</td><td>0.83</td></tr>
+<tr><td>19</td><td>a18 + input-side learned depth feature</td><td>0.14</td><td>0.07</td><td>0.78</td></tr>
+<tr><td>20</td><td>a18 at 32M params</td><td>0.11</td><td>0.07</td><td>0.82</td></tr>
+<tr><td>21</td><td>decoder depth-attn head replacement</td><td>0.14</td><td>0.07</td><td><strong>0.85</strong></td></tr>
+<tr><td>22</td><td>decoder depth-attn additive bias</td><td>0.13</td><td>0.07</td><td><strong>0.85</strong></td></tr>
+<tr><td>23</td><td>bracketed-LF output</td><td>0.09</td><td>0.07</td><td><strong>0.85</strong></td></tr>
+</tbody></table>
+<p>The apparent wall decomposes into three regimes. Attempts 11-17 show that depth recursion inside trained support is partly movable, especially once targeted synthesis is paired with scale. Attempt 14 shows that <code>obj_pp_to_subj_pp</code> was a pure coverage gap: 1600 subject-PP examples move it from 0% to 80.4%. Attempts 18-23 then isolate the remaining hard case: PP/CP recursion at depths roughly d7 and beyond stays near zero even under direct deep supervision, explicit depth features, 32M scale, depth-aware decoder attention, and bracketed output targets.</p>
+<h3 id="7-1-the-length-clipping-confound-attempt-10">7.1 The length-clipping confound (attempt 10)</h3>
+<p>While drafting this section, we noticed that attempts 01–09 used <code>max_in = 25</code> and <code>max_out = 150</code>. Length statistics on the Gen split:</p>
+<table>
+<thead><tr><th>Category</th><th>n</th><th>src &gt; 25 tokens</th><th>LF &gt; 150 tokens</th></tr></thead>
+<tbody>
+<tr><td><code>cp_recursion</code></td><td>1000</td><td>688</td><td>847</td></tr>
+<tr><td><code>pp_recursion</code></td><td>1000</td><td>633</td><td>783</td></tr>
+<tr><td><code>obj_pp_to_subj_pp</code></td><td>1000</td><td>0</td><td>0</td></tr>
+<tr><td>All 18 other categories</td><td>18000</td><td>0</td><td>1</td></tr>
+</tbody></table>
+<p>Attempts 01–09 silently truncated 60–85% of <code>cp_recursion</code> and <code>pp_recursion</code> inputs and prevented generation of the full LF on a similar fraction. Exact-match accuracy on a truncated example is mechanically zero regardless of architecture.</p>
+<p>This observation raised a serious confound: was the "wall" an architectural phenomenon, or a hyperparameter one? Under the pre-commit protocol we registered attempt 10 as a specific control: re-run the attempt 09 architecture with <code>max_in = 80</code> and <code>max_out = 500</code> (covering gen-split max_src = 61 and max_lf = 480 with headroom), change nothing else. If the wall is a clipping artifact, <code>pp_recursion</code> and <code>cp_recursion</code> should move; <code>obj_pp_to_subj_pp</code> should remain unchanged because its inputs never clipped.</p>
+<h3 id="7-2-attempt-10-decisive-null">7.2 Attempt 10: decisive null</h3>
+<table>
+<thead><tr><th>Metric</th><th>Attempt 09</th><th>Attempt 10 (raised limits)</th></tr></thead>
+<tbody>
+<tr><td>IID dev</td><td>99.56%</td><td>99.42%</td></tr>
+<tr><td>Gen aggregate</td><td>68.84%</td><td>65.40%</td></tr>
+<tr><td><code>pp_recursion</code></td><td>1.17%</td><td><strong>0.20%</strong></td></tr>
+<tr><td><code>cp_recursion</code></td><td>0.00%</td><td><strong>0.00%</strong></td></tr>
+<tr><td><code>obj_pp_to_subj_pp</code></td><td>0.00%</td><td><strong>0.00%</strong></td></tr>
+</tbody></table>
+<p>The two formerly-clipped categories did not move. The slight Gen regression (−3.4pp) is attributable to the batch-size reduction from 128 to 64 (needed to keep memory under the H100 envelope at <code>max_out = 500</code>). The control is decisive: <strong>length clipping was not the cause of the structural-gen failure</strong>. The wall is real, not an artifact.</p>
+<h3 id="7-3-what-we-think-is-happening">7.3 What we think is happening</h3>
+<p>Our initial account of the wall is distributional but non-uniform across the three categories. COGS training LFs have a maximum of 153 tokens (about 8 atomic predicates, recursion depth ≤ 2). The Gen split tests LFs up to 480 tokens (up to 43 predicates, depth 5+). For the depth categories (<code>pp_recursion</code>, <code>cp_recursion</code>), the model never observes a training example in which the recursive production fires more than twice. For <code>obj_pp_to_subj_pp</code>, the failure is cross-positional: a PP modifier trained only on object positions is asked to appear in subject position at test time — a different failure mode even though it coexists at 0% aggregate.</p>
+<p>This distinction turned out to be crucial. §7.5 (attempts 11–13) shows that for the depth categories, coverage is necessary but not sufficient: 800 examples per depth lift in-support depths partially, but 2500 per depth cannot lift the ceiling. §7.6 (attempt 14) shows that for <code>obj_pp_to_subj_pp</code>, coverage is both necessary and sufficient: 1600 targeted synthetic examples close the gap from 0% to 80%. The two categories fail for mechanistically different reasons.</p>
+<p>This is consistent with:</p>
+<ul>
+<li>The probe result (Section 4): encoder has the information. The missing piece is in the decoder output distribution.</li>
+<li>The flat 0% across categorically different early interventions (encoder factorization, typed routing, copy, ALiBi, raised lengths). An architectural-capacity hypothesis that implicates a specific component should have shown <em>something</em> across the first ten COGS attempts. The fact that a small targeted data intervention (a14, 1600 examples) moved <code>obj_pp_to_subj_pp</code> while no architectural change did is the strongest evidence that the initial 0% on that category was data-distribution-driven, not architectural-capacity-driven. The literature agrees directionally on depth: tree-structured decoders (Herzig &amp; Berant 2021; Chen et al. 2020), data-augmentation approaches (GECA, Andreas 2020), and curriculum methods have crossed the depth categories where architectural changes alone have not. We did not include decoder-structural interventions in this program.</li>
+</ul>
+<h3 id="7-4-what-the-wall-does-and-does-not-rule-out">7.4 What the wall does and does not rule out</h3>
+<p>The program now rules out several explanations as sufficient:</p>
+<ol>
+<li><strong>Encoder representation.</strong> Attempts 04-07 and the linear probe show that lexical identity is already present in the encoder.</li>
+<li><strong>Typed attention or auxiliary factorization.</strong> These move some common noun categories but do not solve proper nouns or structural recursion.</li>
+<li><strong>Copy and ALiBi alone.</strong> Attempts 08-09 produce lexical-routing wins, but leave the structural categories at the floor.</li>
+<li><strong>Length limits.</strong> Attempt 10 raises max input/output lengths and leaves recursion unchanged.</li>
+<li><strong>Depth coverage at fixed 1.2M scale.</strong> Attempts 11-13 show partial in-support movement, but 3.1× more depth data does not flatten the depth-decay curve.</li>
+<li><strong>Cross-position capacity.</strong> Attempt 14 solves <code>obj_pp_to_subj_pp</code> with 1600 examples, so that category was data-distributional rather than an architectural capacity limit.</li>
+<li><strong>Scale as a simple fix.</strong> Attempt 17 shows useful 10M gains inside trained depth support; attempt 20 shows that the response does not continue monotonically to 32M and does not lift d7-d9.</li>
+<li><strong>Making depth visible.</strong> Attempts 19, 21, 22, and 23 expose depth at the input, in decoder self-attention, and in the output stream. None lifts past-d6 recursion. The program still does not test a full structural-operation decoder. Tree decoders, stack-augmented decoders, production-rule decoders, and pointer-to-open-modifier mechanisms remain viable follow-up candidates. The narrower claim is that the ordinary linearized Transformer decoder, even with copy, ALiBi, explicit depth signals, bracketed outputs, and up to 32M parameters, does not learn a robust recursive emission operation for COGS PP/CP depth.</li>
+</ol>
+<h3 id="7-5-refining-the-distributional-hypothesis-with-depth-specific-synthesis-attempts-11-12">7.5 Refining the distributional hypothesis with depth-specific synthesis (attempts 11–12)</h3>
+<p>After attempts 03–10 established the wall on pre-committed architectural and length-clipping interventions, we ran two data-side attempts. Both use attempt 09's architecture frozen, adding 6400 algorithmically synthesized training examples: 800 each at PP depths 3, 4, 5, 6 and 800 each at CP depths 3, 4, 5, 6. Synthesis extends COGS-native depth-1 seeds by chaining <code>PREP DET NOUN</code> (PP axis) or <code>AGENT V_past that</code> (CP axis) with position-indexed LFs that round-trip through our parser.</p>
+<p><strong>Attempt 11</strong> registered five pre-commit thresholds and failed all of them (PP aggregate 7%, CP aggregate 0%, Gen aggregate 60.9%). Post-hoc inspection of the synthesized CP LFs revealed an ordering discrepancy: our synth placed the innermost-clause predicates <em>before</em> the chain extensions, whereas COGS's canonical form places them at the tail. The model learned a consistent-but-wrong canonical for its new depths. <strong>Attempt 12</strong> fixed this single issue (one-line change in the partition rule, all else identical). Results:</p>
+<table>
+<thead><tr><th></th><th>Attempt 11</th><th>Attempt 12</th><th>Δ</th></tr></thead>
+<tbody>
+<tr><td>Gen aggregate</td><td>60.92%</td><td><strong>67.28%</strong></td><td>+6.36pp</td></tr>
+<tr><td><code>cp_recursion</code> aggregate</td><td>0.00%</td><td><strong>5.60%</strong></td><td>+5.60pp</td></tr>
+<tr><td><code>pp_recursion</code> aggregate</td><td>7.10%</td><td>8.67%</td><td>+1.57pp</td></tr>
+<tr><td><code>obj_pp_to_subj_pp</code></td><td>0.00%</td><td>0.00%</td><td>—</td></tr>
+</tbody></table>
+<p>The canonical-ordering fix was necessary and sufficient to unlock the CP axis, confirming that attempt 11's CP null was a synthesis artifact, not a deeper architectural fact. It also ruled out one of the two hypotheses we left open at the end of attempt 11 ("synth did not teach stack-ccomp"). The model learned both recursive productions from 3200 examples each — it was being evaluated against the wrong canonical form.</p>
+<h4 id="the-depth-specific-transfer-curve">The depth-specific transfer curve</h4>
+<p>With the canonical fix in place, per-depth accuracy reveals a clean monotonic decay on both axes, near-identical in shape:</p>
+<table>
+<thead><tr><th>Test depth</th><th><code>pp_recursion</code></th><th><code>cp_recursion</code></th></tr></thead>
+<tbody>
+<tr><td>3 (trained, 800 ex.)</td><td><strong>0.667</strong></td><td><strong>0.340</strong></td></tr>
+<tr><td>4 (trained, 800 ex.)</td><td>0.167</td><td>0.137</td></tr>
+<tr><td>5 (trained, 800 ex.)</td><td>0.033</td><td>0.060</td></tr>
+<tr><td>6 (trained, 800 ex. — deepest)</td><td>0.003</td><td>0.027</td></tr>
+<tr><td>7 (unseen)</td><td>0.000</td><td>0.000</td></tr>
+<tr><td>8–12 (unseen)</td><td>0.000</td><td>0.000</td></tr>
+</tbody></table>
+<p>Seed-level stdev is ≤0.05 at every cell.</p>
+<p>Two things are notable:</p>
+<ol>
+<li><strong>Generalization radius past the deepest trained depth is ≈ 0.</strong> Even though the model was trained on depths 3–6 uniformly, it scores 0% on depths 7–12. This is not an "extrapolation difficulty" in the soft sense — the drop is a cliff, not a slope.</li>
+<li><strong>Accuracy collapses monotonically even inside trained depths.</strong> All four of {d3, d4, d5, d6} received the same number of synth examples (800). A uniform-support model would show roughly uniform accuracy across these depths. Instead, accuracy falls by ~4× per depth step (PP: 67 → 17 → 3 → 0; CP: 34 → 14 → 6 → 3). The model's <em>effective</em> support collapses toward a lower mode than its <em>trained</em> support. This refines the distributional hypothesis stated in §7.3. The original form was: "the model fails because it never observes depth-3+ at training time." Attempts 11–12 show this is necessary but insufficient: &gt; <strong>Refined distributional hypothesis.</strong> Small transformer decoders do &gt; not transfer uniformly across their trained-depth support for &gt; recursive productions. Coverage at a depth is necessary but not &gt; sufficient for reliable accuracy at that depth. The effective support &gt; is modal rather than uniform, decaying by roughly 4× per depth step &gt; away from the modal depth. The generalization radius past the deepest &gt; trained depth is ≈ 0. We identified two candidate mechanisms for this modal decay:</li>
+</ol>
+<ul>
+<li><strong>H1 (coverage artifact):</strong> 800 examples at d5/d6 is insufficient; at higher coverage the curve would flatten.</li>
+<li><strong>H2 (inductive bias):</strong> the decoder amortizes toward shorter compositions regardless of coverage. <strong>Attempt 13</strong> tested these by scaling synth from 800 → 2500 examples per depth (3.1×; 20000 total, 34% of effective training mix). All other factors identical to attempt 12.</li>
+</ul>
+<table>
+<thead><tr><th>Depth</th><th>a12 PP (800/d)</th><th>a13 PP (2500/d)</th><th>a12 CP</th><th>a13 CP</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>0.667</td><td>0.467</td><td>0.340</td><td>0.350</td></tr>
+<tr><td>4</td><td>0.167</td><td>0.053</td><td>0.137</td><td>0.120</td></tr>
+<tr><td>5</td><td>0.033</td><td>0.030</td><td>0.060</td><td>0.060</td></tr>
+<tr><td>6</td><td>0.003</td><td>0.000</td><td>0.027</td><td>0.017</td></tr>
+<tr><td>7+</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+</tbody></table>
+<p>Scaling coverage did not help at any depth on either axis, and produced a 20pp regression at PP d3. Gen aggregate dropped −6.2pp (67.28% → 61.08%) with lateral damage to several non-recursive categories (<code>do_dative_to_pp_dative</code> −38pp, <code>unacc_to_transitive</code> −37pp, <code>passive_to_active</code> −27pp) — the standard data-augmentation distribution-shift trade-off.</p>
+<p><strong>H1 is falsified; H2 is supported.</strong> The monotonic within-depth decay is an inductive-bias property of the decoder at this scale, not a data-volume artifact. Coverage is not the binding constraint on depth-transfer generalization for small transformers on COGS recursion.</p>
+<p>This yields a concrete methodological claim for future work:</p>
+<p>&gt; <em>Narrow-scope algorithmic data augmentation for depth-recursion transfer &gt; has a coverage ceiling that is hit by roughly 800 examples per depth &gt; at the 1.2M-parameter scale. Past that, additional examples cause &gt; lateral regressions without improving depth transfer. Further progress &gt; on this axis requires scale, broader-scope synthesis (full GECA &gt; substructure composition), or decoder-side architectural changes &gt; (tree-structured decoders).</em></p>
+<h4 id="scale-refines-but-does-not-break-the-modal-decay-attempt-17">Scale refines but does not break the modal decay (attempt 17)</h4>
+<p>The same per-depth breakdown at 10M params and 22k steps (the pre-committed a17 schedule, d3..6 synth):</p>
+<table>
+<thead><tr><th>Depth</th><th>a12 PP (1.2M, 800/d)</th><th>a13 PP (1.2M, 2500/d)</th><th><strong>a17 PP (10M, 800/d)</strong></th></tr></thead>
+<tbody>
+<tr><td>3</td><td>0.667</td><td>0.467</td><td><strong>0.847</strong></td></tr>
+<tr><td>4</td><td>0.167</td><td>0.053</td><td><strong>0.557</strong></td></tr>
+<tr><td>5</td><td>0.033</td><td>0.030</td><td><strong>0.230</strong></td></tr>
+<tr><td>6</td><td>0.003</td><td>0.000</td><td><strong>0.050</strong></td></tr>
+<tr><td>7+</td><td>0.000</td><td>0.000</td><td><strong>0.000</strong></td></tr>
+</tbody></table>
+<table>
+<thead><tr><th>Depth</th><th>a12 CP</th><th>a13 CP</th><th><strong>a17 CP</strong></th></tr></thead>
+<tbody>
+<tr><td>3</td><td>0.340</td><td>0.350</td><td><strong>0.370</strong></td></tr>
+<tr><td>4</td><td>0.137</td><td>0.120</td><td><strong>0.147</strong></td></tr>
+<tr><td>5</td><td>0.060</td><td>0.060</td><td><strong>0.067</strong></td></tr>
+<tr><td>6</td><td>0.027</td><td>0.017</td><td>0.017</td></tr>
+<tr><td>7+</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+</tbody></table>
+<p>Two observations. (i) <em>Within-support</em>, scale multiplies each depth's accuracy: PP d4 3.3×, d5 7.7×, d6 ≈ 17×. The relative lift grows with depth — scale helps most where 1.2M-parameter decoding collapses hardest. (ii) <em>Past support</em>, every depth stays at 0. Radius does not change between 1.2M (a13) and 10M (a17) at matched coverage. The shape of the curve is preserved; only its height moves.</p>
+<p>This is a sharper picture than "depth is inductive-bias-bound." The decoder's in-support decay curve is <em>capacity-bound</em>. Its out-of-support radius (d ≥ 7 with d3..6 training) is 0 at every scale we have tested — a separate, stronger constraint.</p>
+<h4 id="attempt-18-radius-0-is-architectural-not-coverage-of-support">Attempt 18: radius-0 is architectural, not coverage-of-support</h4>
+<p><strong>Attempt 18</strong> extended depth synth from d3..d6 to d3..d9 (800 per depth per axis; 11200 depth lines + 1600 subj-PP = 12800 total, 38% of augmented train) while holding the 10M backbone and 22k-step schedule constant. Seven pre-committed thresholds, with the primary being PP d7 accuracy ≥ 0.05 — a minimal lift above noise, registered as the decisive H1-vs-H2 test.</p>
+<p>Per-depth results (mean of 3 seeds, at step 22000):</p>
+<table>
+<thead><tr><th>Depth</th><th>PP a17 (d3..6 trained)</th><th><strong>PP a18 (d3..9 trained)</strong></th><th>CP a17</th><th><strong>CP a18</strong></th></tr></thead>
+<tbody>
+<tr><td>3</td><td>0.847</td><td>0.867</td><td>0.370</td><td>0.387</td></tr>
+<tr><td>4</td><td>0.557</td><td>0.543</td><td>0.147</td><td>0.160</td></tr>
+<tr><td>5</td><td>0.230</td><td>0.207</td><td>0.067</td><td>0.057</td></tr>
+<tr><td>6</td><td>0.050</td><td>0.063</td><td>0.017</td><td>0.043</td></tr>
+<tr><td><strong>7</strong></td><td>0.007</td><td><strong>0.017</strong> <em>(now trained, 800 ex)</em></td><td>0.000</td><td><strong>0.020</strong></td></tr>
+<tr><td><strong>8</strong></td><td>0.000</td><td><strong>0.010</strong> <em>(now trained)</em></td><td>0.000</td><td><strong>0.010</strong></td></tr>
+<tr><td><strong>9</strong></td><td>0.000</td><td><strong>0.000</strong> <em>(now trained)</em></td><td>0.000</td><td><strong>0.000</strong></td></tr>
+<tr><td>10+</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+</tbody></table>
+<p><strong>Verdict: REJECTED on primary (3/7 thresholds); H1 falsified, H2 confirmed.</strong></p>
+<p><strong>The three most striking points of a18:</strong></p>
+<ol>
+<li><em>At d9, despite 800 targeted training examples, accuracy is 0.000 across all three seeds for both PP and CP axes.</em> The model was given explicit supervision on the exact depth being tested and extracted zero signal.</li>
+<li>At d7 and d8, the model extracts 0.010-0.020 — minimal signal, 2-3 orders of magnitude below in-distribution training accuracy at those depths (IID agreement at d7-d9 during training is &gt;99%).</li>
+<li>The decay curve shape is preserved: adding d7..d9 training neither helped those deep depths (which are now in-support) nor shifted d3..d6 accuracy materially. The aggregate <code>pp_recursion</code> metric barely moved (a17 0.169 → a18 0.171) despite 60% more depth synth. Aggregate Gen dropped 2.8pp due to the larger synth burden worsening lateral regressions. The training signal at d7-d9 was absorbed (IID loss fell normally) without transferring to the gen eval at those depths.</li>
+</ol>
+<h4 id="the-nine-way-wall-decomposition-a13-a17-a18-a19-a20-a21-a22-a23-plus-a10">The nine-way wall decomposition (a13 + a17 + a18 + a19 + a20 + a21 + a22 + a23, plus a10)</h4>
+<p>Five attempts now jointly pin down what kind of phenomenon the depth wall is:</p>
+<ul>
+<li><strong>a13:</strong> at 1.2M, 3.1× coverage at d3..d6 does not lift any depth's accuracy. Rules out: "coverage of trained depths is the bottleneck."</li>
+<li><strong>a17:</strong> at 10M with the same 800/d coverage as a15, in-support accuracy lifts substantially (PP d5 0.03→0.23, d6 0.00→0.05), but d7+ stays at 0. Rules out: "scale alone lifts radius past trained depths."</li>
+<li><strong>a18:</strong> at 10M with 800/d coverage <em>extended to d7..d9</em>, in-support accuracy at the newly-trained deep depths is 0.00-0.02, and the d9 number is 0.000 across all three seeds. Rules out: "in-support coverage lifts deep depths."</li>
+<li><strong>a19:</strong> at 10M with the a18 12800-synth mix, add a learned per-token depth feature (<code>nn.Embedding(16, 256)</code> summed with the token embedding, <code>depth_id[i]</code> = count of <code>{in, on, beside, that}</code> strictly before position <code>i</code>). PP d7 stays at 0.017 — identical to a18 — and PP d4–d6 <em>regress</em> by 5–15pp. Rules out: "past-d6 failure is an input-representation gap."</li>
+<li><strong>a20:</strong> at 32M (4× a17 scale; d_model 256→512, heads 8→16), with the a18 12800-synth mix and no depth embedding, PP d7 lands at 0.013 (worse than a18), PP d9 stays at 0.000, and in-support depths <em>regress</em> 15–27pp (PP d4 0.54→0.28, d5 0.21→0.06). Rules out: "more scale crosses past-d6" — the log-linear extrapolation from a15→a17 (which predicted PP d5 ≥ 0.40 and PP d7 ≥ 0.06) is falsified at the next multiplier. The remaining conclusion: a sequence-to-sequence transformer with pointer-generator copy, tested at 1.2M, 10M, and 32M parameters (27× total scale range), learns depth-recursion as a bag of shallow structural templates — not a recursive rule. At depths past roughly 6, there is too little frequent-enough structural redundancy in the gen split for this template-extraction mechanism to recognize a deeper instance, <em>even when</em> 800 explicit training examples at that depth are supplied, <em>even when</em> each input token carries an explicit learned depth label, and <em>even when</em> the parameter budget is raised another 4×. The bottleneck is therefore not at the encoder, the input level, or the scale-of-parameters axis within the regimes we have tested — it lives in the decoder's inability to compose recursive output structure. This decomposes the paper's three-category "structural wall" into three mechanistically distinct phenomena:</li>
+</ul>
+<ol>
+<li><code>obj_pp_to_subj_pp</code> — <em>fully distributional</em>. 1600 targeted examples close it at 1.2M; scale-invariant (a14, a17, a20 all cluster near 0.80–0.84).</li>
+<li><code>pp_recursion</code> / <code>cp_recursion</code> <strong>within depth support</strong> — <em>capacity-bound below a ceiling</em>. Scale 1.2M → 10M multiplies d5-d6 in-support accuracy by 7-17× (a12 → a17). Scale 10M → 32M at the same step budget regresses all trained depths (a20), so the capacity lift is not a pure log-linear scaling law but has a ceiling at or near the 10M/22k optimum.</li>
+<li><code>pp_recursion</code> / <code>cp_recursion</code> <strong>at deeper-than-templatable depths and past all support</strong> — <em>architectural, decoder-side</em>. Neither coverage (a13), scale alone (a17), their combination at d7..d9 with explicit supervision (a18), an input-side learned depth feature (a19), a 4× further scale increase to 32M (a20), a decoder- self-attention head-replacement with a depth-distance bias (a21), the additive formulation of that same decoder-attention intervention with a learnable scalar α (a22), nor a visible depth register wrapped around every nmod/ccomp subtree in the output stream (a23) lifts this. a19 localizes the architectural residue downstream of the encoder; a20 rules out scale as a fix within this transformer backbone family; a21 rules out <em>substitutive</em> decoder-self-attention depth bias; a22 rules out <em>additive</em> decoder-self-attention depth bias — the model actively uses the depth signal (learned α drifts 20% upward from init across all seeds) and yet PP d9 stays at 0.000 and PP d7 at the a18 floor of 0.010; a23 rules out the minimum-invasive output-structural intervention — making depth visible as a surface token on the output stream regresses in-support depth recursion by up to 32pp (PP d3 0.867 → 0.543) without lifting past-d6, because emitting the bracket at the right moment is itself a structural learning problem. Decoder self-attention attending to its own emitted prefix with a depth-distance signal is not the missing ingredient, and neither is a visible output-side depth register. All three components are supported by at least one pre-committed experiment with an explicit falsification criterion. The third component is the strongest architectural null the program has produced: <code>d9 = 0.000</code> under targeted supervision is not a coverage artifact, not an input-representation artifact, not a scale artifact across 27× parameter range, and not a depth-visibility artifact in the input (a19), in self-attention (a21+a22), or in the output stream (a23).</li>
+</ol>
+<h4 id="attempt-19-input-side-depth-feature-does-not-lift-past-d6">Attempt 19: input-side depth feature does not lift past-d6</h4>
+<p>Attempt 18 left the past-d6 failure pinned as "architectural." The natural next objection is that 10M parameters simply do not have a clean internal representation of nesting depth: the transformer is forced to infer the current depth from the local token context (<code>in</code>, <code>on</code>, <code>beside</code>, <code>that</code>) and self-attention, and this inference may compose poorly at depth 7 or beyond. If that were true, providing an explicit per-token depth feature at the input should lift PP d7 and above.</p>
+<p>Attempt 19 tests this directly. On the same 10M backbone, same a18 12800-line synth (d3..d9 + subject-PP), and same 22k-step schedule, we add a single learned <code>nn.Embedding(16, 256)</code> and sum it with the token embedding at the input. The depth index for each position is the number of <code>{in, on, beside, that}</code> tokens appearing strictly before that position. The embedding adds 4096 parameters (&lt;0.1% of total) and is the minimum architectural change that gives the encoder a clean depth signal.</p>
+<table>
+<thead><tr><th>Depth</th><th>PP a18</th><th><strong>PP a19</strong></th><th>CP a18</th><th><strong>CP a19</strong></th></tr></thead>
+<tbody>
+<tr><td>d3</td><td>0.867</td><td>0.853</td><td>0.387</td><td>0.403</td></tr>
+<tr><td>d4</td><td>0.543</td><td><strong>0.390 (−15pp)</strong></td><td>0.160</td><td>0.160</td></tr>
+<tr><td>d5</td><td>0.207</td><td><strong>0.063 (−14pp)</strong></td><td>0.057</td><td>0.063</td></tr>
+<tr><td>d6</td><td>0.063</td><td><strong>0.017 (−5pp)</strong></td><td>0.043</td><td>0.040</td></tr>
+<tr><td>d7</td><td>0.017</td><td>0.017</td><td>0.020</td><td>0.020</td></tr>
+<tr><td>d8</td><td>0.010</td><td>0.013</td><td>0.010</td><td>0.010</td></tr>
+<tr><td>d9</td><td><strong>0.000</strong></td><td><strong>0.000</strong></td><td><strong>0.000</strong></td><td><strong>0.000</strong></td></tr>
+</tbody></table>
+<p>Pre-committed primary threshold <code>PP d7 ≥ 0.10</code> fails at 0.017. Attempt 19 is REJECTED on primary (3/7).</p>
+<p>Two things are striking. First, the depth feature provides no lift whatsoever at d7, d8, or d9 — the same flat-near-zero pattern as a18. Second, the feature <em>regresses</em> in-support depth accuracy on the PP axis by 5–15pp at d4, d5, d6. Plausible mechanism: the depth index gives the model a cheap discriminative feature for which training templates it has seen before at that level, and the model trades structural-pattern extraction (which a18 was doing cleanly at d3..d6) for depth-indexed retrieval (which is fragile outside training coverage). The CP axis is unaffected, because CP depth was already at a near-floor value on which the depth feature cannot operate.</p>
+<p>Read as a pre-committed control, attempt 19 closes out the most obvious alternative to the decoder-side reading of the architectural null: "the encoder just didn't have depth information." The encoder <em>can</em> have cleaner depth information; it does not help. The remaining candidate mechanism is decoder-side — the decoder's linearized LF emission cannot compose recursive structures it has not extracted as templates.</p>
+<h4 id="attempt-20-4-more-scale-does-not-cross-past-d6-either">Attempt 20: 4× more scale does not cross past-d6 either</h4>
+<p>Attempts 17 (8× scale at fixed coverage, 1.2M → 10M) and 18/19 (direct supervision and input-side depth-feature at 10M) left open one last natural objection: the past-d6 wall might simply live above the scale ceiling we had reached. The log-linear scaling pattern between a15 (1.2M, <code>pp_recursion</code> 0.09) and a17 (10M, <code>pp_recursion</code> 0.17) and between a12 (1.2M, PP d5 0.03) and a17 (10M, PP d5 0.23) could have predicted that another 4× scale lifts PP d7 into double digits.</p>
+<p>Attempt 20 is the pre-committed test. Same a18 architecture (ALiBi + pointer-generator, no depth embedding), same 12800-synth mix, same 22k-step schedule, scaled backbone: d_model 256 → 512, heads 8 → 16 (head_dim 32 unchanged), 4+4 layers, batch 48 (reduced from 64 to fit 80GB H100). Actual parameter count 31,082,712 — ≈4× a17's 8.07M, 27× a12's baseline.</p>
+<p>Per-depth results (mean of 3 seeds, at step 22k):</p>
+<table>
+<thead><tr><th>Depth</th><th>PP a17 (10M)</th><th>PP a18 (10M+d7-9)</th><th>PP a19 (10M+depth-embed)</th><th><strong>PP a20 (32M)</strong></th></tr></thead>
+<tbody>
+<tr><td>d3</td><td>0.847</td><td>0.867</td><td>0.853</td><td><strong>0.717 (−15pp)</strong></td></tr>
+<tr><td>d4</td><td>0.557</td><td>0.543</td><td>0.390</td><td><strong>0.277 (−27pp)</strong></td></tr>
+<tr><td>d5</td><td>0.230</td><td>0.207</td><td>0.063</td><td><strong>0.060 (−15pp)</strong></td></tr>
+<tr><td>d6</td><td>0.050</td><td>0.063</td><td>0.017</td><td>0.027</td></tr>
+<tr><td>d7</td><td>0.000</td><td>0.017</td><td>0.017</td><td><strong>0.013</strong></td></tr>
+<tr><td>d8</td><td>0.000</td><td>0.010</td><td>0.013</td><td>0.010</td></tr>
+<tr><td>d9</td><td>0.000</td><td><strong>0.000</strong></td><td><strong>0.000</strong></td><td><strong>0.000</strong></td></tr>
+</tbody></table>
+<p>Pre-committed P1 (PP d7 ≥ 0.10, decisive) and P1b (PP d7 ≥ 0.03, soft) both fail. S1 (PP d5 ≥ 0.40), S2 (pp_rec aggregate ≥ 0.25), and S3 (PP d6 ≥ 0.15) all fail. R1/R2/R3 (non-decisive retention) all pass, but IID for seed 43 dropped to 0.981 — visible capacity strain. <strong>Score 3/8; REJECTED on primary; log-linear scale extrapolation falsified.</strong></p>
+<p>Two observations matter for the decomposition:</p>
+<ol>
+<li><em>PP d9 = 0.000 is invariant under 27× total parameter scaling (1.2M → 32M) and both direct supervision and input-side depth marking.</em> d9 is not a scale-bound phenomenon within the transformer backbone family at the coverage levels we have tested.</li>
+<li><em>In-support depths regress under 4× more scale.</em> a17 (10M) is not a point on a monotone scale-up curve — it is near an optimum for this synth-and-schedule combination. At 32M with batch 48 × 22k steps, the larger model sees 1.06M training examples versus a18's 1.41M at batch 64, and appears to undertrain. The capacity-reallocation signature from a15/a16/a17 (wall-axis accuracies deterministic, non-synth categories seed-stochastic) compounds at 32M. Attempt 20 was registered with three interpretive paths: BREAKTHROUGH (P1 met, past-d6 is scale-sensitive), PARTIAL (P1b met, P1 missed; soft monotone response), and REJECTED (both P1 and P1b missed, past-d6 survives 4× more scale). The outcome is REJECTED. Combined with a13, a17, a18, a19, this is the program's fifth pre-committed rule-out of an alternative to the decoder-side reading — past-d6 failure is <em>not</em> crossed by coverage-of-trained-depths, scale alone, coverage-of-in-support-deep- training, input-side depth representation, or more scale at the extended-depth supervision regime.</li>
+</ol>
+<h4 id="attempt-21-decoder-depth-aware-attention-head-replacement-modestly-regresses-in-support-does-not-crack-past-d6">Attempt 21: decoder depth-aware attention (head-replacement) modestly regresses in-support, does not crack past-d6</h4>
+<p>Attempts 13–20 isolated the residue to decoder-side recursive composition without directly intervening on the decoder's internal computation. Attempt 21 is the program's first decoder-side architectural intervention on the past-d6 wall. On the same 10M backbone and same 12800-line a18 synth, we replace the decoder self-attention's ALiBi position-distance bias on <em>one head</em> (head 0, the smallest-slope head and therefore the one that carries the longest-range positional signal) with a depth-distance bias. Depth is defined on the output stream as the count of <code>nmod</code> and <code>ccomp</code> tokens appearing strictly before the current decode position — the same LF-level depth markers used to define the synth's depth in a12/a18. The remaining 7 heads are unchanged. Parameter count is identical to a18 (the depth-marker mask is a bool buffer). The hypothesis: giving one decoder head an explicit same-depth routing signal should improve cross-depth predicate binding at d7+.</p>
+<p>Per-depth PP (mean of 3 seeds, 22k steps):</p>
+<table>
+<thead><tr><th>Depth</th><th>PP a18 (10M)</th><th><strong>PP a21 (depth-attn head-replace)</strong></th><th>Δ</th></tr></thead>
+<tbody>
+<tr><td>d3</td><td>0.867</td><td><strong>0.797</strong> <em>(seeds: 0.91, 0.61, 0.87)</em></td><td>−7pp</td></tr>
+<tr><td>d4</td><td>0.543</td><td>0.443</td><td>−10pp</td></tr>
+<tr><td>d5</td><td>0.207</td><td>0.133</td><td>−7pp</td></tr>
+<tr><td>d6</td><td>0.063</td><td>0.010</td><td>−5pp</td></tr>
+<tr><td>d7</td><td>0.017</td><td>0.010</td><td>−1pp</td></tr>
+<tr><td>d8</td><td>0.010</td><td>0.010</td><td>0</td></tr>
+<tr><td>d9</td><td>0.000</td><td>0.000</td><td>0</td></tr>
+</tbody></table>
+<p>Pre-committed primary P1 (PP d7 ≥ 0.10) fails at 0.010; P2 (PP d9 ≥ 0.03) and P3 (pp_rec aggregate ≥ 0.25) also fail; S1/S2 fail; R1/R2/R3 (non-decisive retention) pass — R1 <code>obj_pp_to_subj_pp</code> at 0.853 is the program's best cross-position result. Score 3/8; <strong>REJECTED on primary</strong>.</p>
+<p>The <code>cp_recursion</code> axis is approximately at a18-parity with a slight d3 lift (+4pp): d3 0.430, d4 0.150, d5 0.060, d6 0.033, d7 0.020, d9 0.000. Aggregate <code>gen_agg</code> 0.634 matches a18 within noise.</p>
+<p><strong>Retraction note.</strong> The initial numbers reported for this attempt showed a catastrophic regression — PP d3 0.867 → <strong>0.183</strong> (−68pp), d4 → 0.043, d5 → 0.013 — and were accompanied by a "positional-bandwidth collapse" mechanism attributing the d3 drop to head 0 being the smallest-slope (longest-range) ALiBi head. Both the numbers and the mechanism were wrong. The eval script loaded the trained checkpoint and called <code>load_state_dict</code>, but the model's depth-marker activation flag (<code>_depth_set</code>) is a plain Python attribute set by a setter method at training time; <code>load_state_dict</code> does not restore Python attributes. Eval therefore ran under standard ALiBi (no depth bias) on weights trained under a depth-bias regime — a pure train/eval distribution shift. After fixing eval to restore the flag (<code>_depth_set = True</code> when the depth-marker buffer is non-empty), the true a21 regression is modest and past-d6 remains untouched. The implementation lesson is captured in the retracted findings.md and as a methodological <code>feedback_state_dict_flags.md</code> memory: intervention activation flags should be registered as buffers, not held as Python attributes.</p>
+<p><strong>Mechanism (corrected).</strong> The replaced head 0 had the smallest ALiBi slope and carried long-range positional continuity in a18. Substituting a depth-distance bias on that head costs a little of that continuity — approximately −7 to −10pp on in-support depths d3–d5 — and gives back roughly cp d3 +4pp, which is consistent with depth-aware routing helping slightly on predicate binding while position-aware routing helps slightly more on surface-order prediction. Past-d6 accuracy is unchanged to within noise because the wall past d6 is not a routing problem that this head's substitution can address. Seed spread at d3 is substantially larger than a18's (0.91/0.61/0.87 vs a18's near-tight 0.87), suggesting the intervention sits on an optimization edge — sometimes the model finds a near-a18 solution, sometimes a modestly worse one.</p>
+<p><strong>What a21 rules out.</strong> Replacing an existing ALiBi head with a depth-distance bias does not crack past-d6 and costs a modest −7pp mean on in-support depths. The head-replacement implementation is refuted by a pre-committed test, though not as catastrophically as the initial (buggy) numbers suggested.</p>
+<p><strong>What remains open.</strong> The broader "decoder-side depth-aware attention" hypothesis has at least two cleaner formulations:</p>
+<ol>
+<li><em>Additive</em>: keep all 8 ALiBi heads intact; add a depth-distance bias as an <em>extra term</em> on one head's existing position bias. Tests whether a depth signal <em>incremental to</em> position helps. This is the natural a22 and avoids the mild substitution cost.</li>
+<li><em>Multiplicative/gated</em>: learn per-head gates combining depth- and position-bias; the model decides head-by-head how to mix the two. More parameters, harder to ablate cleanly. Formulation (1) is the cleanest a18-comparable control. If a22 also fails to lift past-d6, the decoder-self-attention depth signal is insufficient and the next intervention should target output structure directly (bracketed LF emission or tree-structured decoding).</li>
+</ol>
+<h4 id="attempt-22-additive-depth-bias-does-not-crack-past-d6-either">Attempt 22: additive depth bias does not crack past-d6 either</h4>
+<p>Attempt 22 is the direct additive follow-up to a21. All 8 ALiBi heads retain their full position-distance bias; head 0 additionally receives <code>−α · |depth(i) − depth(j)|</code> with <code>α</code> a single learnable scalar initialized to the head's ALiBi slope (0.5). Parameter count is a18 + 1 scalar (8,070,617). Everything else — 10M backbone, a18 12800-line synth (d3..d9 + subject-PP), 22k-step schedule, pointer- generator — matches a18 and a21.</p>
+<p>Eight pre-committed thresholds. P1 (PP d7 ≥ 0.10), P2 (PP d9 ≥ 0.03), P3 (pp_rec aggregate ≥ 0.25), S1 (PP d3 ≥ 0.75, the direct falsifier of "additive preserves positional bandwidth"), S2 (PP d5 ≥ 0.18), R1/R2/R3 (retention of obj_pp, gen_agg, iid).</p>
+<table>
+<thead><tr><th>Depth</th><th>a18</th><th>a21 (replace)</th><th><strong>a22 (add)</strong></th><th>Seeds (a22)</th></tr></thead>
+<tbody>
+<tr><td>d3</td><td>0.867</td><td>0.797</td><td><strong>0.703</strong></td><td>[0.31, 0.89, 0.91]</td></tr>
+<tr><td>d4</td><td>0.543</td><td>0.443</td><td>0.393</td><td>[0.14, 0.51, 0.53]</td></tr>
+<tr><td>d5</td><td>0.207</td><td>0.133</td><td>0.157</td><td>[0.05, 0.20, 0.22]</td></tr>
+<tr><td>d6</td><td>0.063</td><td>0.010</td><td>0.013</td><td>[0.01, 0.00, 0.03]</td></tr>
+<tr><td>d7</td><td>0.017</td><td>0.010</td><td><strong>0.010</strong></td><td>[0.01, 0.01, 0.01]</td></tr>
+<tr><td>d9</td><td>0.000</td><td>0.000</td><td><strong>0.000</strong></td><td>[0.00, 0.00, 0.00]</td></tr>
+</tbody></table>
+<p><strong>REJECTED on primary (3/8).</strong> P1/P2/P3 all fail; S1 fails at 0.703 (by 4.7pp); S2 fails marginally at 0.157; R1 (obj_pp 0.845), R2 (gen_agg 0.616), R3 (iid 0.994) all pass.</p>
+<p>Three observations anchor the interpretation.</p>
+<ol>
+<li><strong>The per-seed split is decisive.</strong> Seeds 43 and 44 sit at PP d3 0.89/0.91 — at or above a18's 0.867. Seed 42 sits at 0.31 and has the lowest IID of the three (0.987 vs 0.998 and 0.997). For 2 of 3 seeds, additive depth bias preserves in-support accuracy exactly as the plan predicted. The aggregate S1 miss is entirely driven by seed 42's degraded optimum.</li>
+<li><strong>Learned α &gt; init, consistently.</strong> Final α values are 0.605, 0.602, 0.578 — all three seeds drifted upward from the 0.5 initialization by roughly 20%. The clean-null prediction pre-registered in the a22 plan ("if depth is useless, α will learn toward zero") is decisively refuted. The model <em>does</em> find depth information useful enough to apply non-trivial pressure on head 0's attention, and yet past-d6 accuracy is unchanged: d7 = 0.010, d9 = 0.000 on all three seeds, identical to a18, a19, a20, and a21.</li>
+<li><strong>CP axis has a mild positive signal that does not compound.</strong> CP d3 is 0.410 (vs a18 0.387); other depths are a18-parity. This is consistent with depth-routing helping slightly on ccomp-chains that fit within the trained support, while past-d6 stays flat. Combined with a21, a22 closes out: &gt; <em>Decoder self-attention equipped with a depth-distance bias, under &gt; either a substitutive or an additive formulation, does not crack &gt; the past-d6 wall.</em> This is a strictly stronger rule-out than a21 alone. a21 left open the possibility that substitution had mechanical side-effects that cancelled depth's benefit; a22 holds position-bias intact, lets the model tune α freely, and still yields past-d6 = 0. The architectural residue is not in the decoder's attention-routing over the already- emitted prefix; if the past-d6 wall is to fall within the transformer family, the remaining decoder-side locus is <strong>output structure</strong>: how predicates are emitted, not how already-emitted predicates are attended to. Candidate interventions are bracketed-LF emission, tree-structured decoding, and stack-augmented production-rule decoders. a23 tests the minimum-invasive member of that family; heavier candidates are registered as follow-on work.</li>
+</ol>
+<h4 id="attempt-23-bracketed-lf-output-does-not-lift-past-d6-and-regresses-in-support">Attempt 23: bracketed-LF output does not lift past-d6 and regresses in-support</h4>
+<p>Attempt 23 is the minimum-invasive output-structural intervention. The target LFs are rewritten so that every <code>nmod</code>/<code>ccomp</code> subtree is wrapped in <code>[...]</code>: the unclosed-bracket count at any emission position is then exactly the current nesting depth. <code>[</code> and <code>]</code> are added to the output vocabulary (727 → 729 tokens; +2 × 256 output-embedding columns and output-projection columns — a 0.01% parameter increase over a18). No attention, positional bias, or other architectural change. The decoder's job is simply to learn the balanced-bracket rule on its output stream. Under the hypothesis that past-d6 failure reflects the absence of a visible depth register in the output, a23 should lift past-d6; under the null hypothesis it should either be neutral (parameters are essentially unchanged) or mildly harmful (longer output sequences are harder to optimize at fixed training budget). Same 10M backbone, same 12800-line a18 synth, same 22k × batch-64 schedule, max_out 500 → 540 to accommodate the ~30 extra brackets on d9 examples.</p>
+<p>Eight pre-committed thresholds. Results per-depth (mean over 3 seeds):</p>
+<table>
+<thead><tr><th>Depth</th><th>a18</th><th>a22 (add)</th><th><strong>a23 (bracketed)</strong></th><th>Seeds (a23)</th></tr></thead>
+<tbody>
+<tr><td>d3</td><td>0.867</td><td>0.703</td><td><strong>0.543</strong></td><td>[0.38, 0.91, 0.34]</td></tr>
+<tr><td>d4</td><td>0.540</td><td>0.393</td><td><strong>0.277</strong></td><td>[0.17, 0.54, 0.12]</td></tr>
+<tr><td>d5</td><td>0.210</td><td>0.157</td><td><strong>0.077</strong></td><td>[0.07, 0.11, 0.05]</td></tr>
+<tr><td>d6</td><td>0.060</td><td>0.013</td><td><strong>0.007</strong></td><td>[0.00, 0.02, 0.00]</td></tr>
+<tr><td>d7</td><td>0.017</td><td>0.010</td><td><strong>0.010</strong></td><td>[0.01, 0.01, 0.01]</td></tr>
+<tr><td>d8</td><td>0.010</td><td>0.010</td><td><strong>0.010</strong></td><td>[0.01, 0.01, 0.01]</td></tr>
+<tr><td>d9</td><td>0.000</td><td>0.000</td><td><strong>0.000</strong></td><td>[0.00, 0.00, 0.00]</td></tr>
+</tbody></table>
+<p>P1 (PP d7 ≥ 0.10) FAILS at 0.010; P2 (d9 ≥ 0.03) FAILS at 0.000; P3 (pp_rec ≥ 0.25) FAILS at 0.092. Calibration S1 (PP d3 ≥ 0.75) FAILS at 0.543; S2 (PP d5 ≥ 0.18) FAILS at 0.077. R1/R2/R3 all pass (obj_pp 0.850, gen_agg 0.662, iid 0.995). Three of eight thresholds pass.</p>
+<p><strong>Two observations.</strong></p>
+<ol>
+<li><strong>Bracketing regresses in-support.</strong> PP d3 drops 32pp below a18 (0.867 → 0.543). PP d4 drops 26pp; PP d5 drops 13pp. The model has to <em>produce</em> the bracket at the right position, and that production itself is an output-structural learning problem: making depth visible on the output stream does not sidestep it, because the decoder must still learn <em>when</em> to emit the visible token. When it misplaces <code>[</code> or <code>]</code>, exact-match scoring also counts the adjacent predicates wrong, so in-support accuracy can regress even when the predicate content is correct.</li>
+<li><strong>Past-d6 is unchanged.</strong> PP d7/d8/d9 = 0.010/0.010/0.000 is identical to a18, a19, a20, a21, a22 within noise. The visible depth register in the output stream is not the missing ingredient. Seed-instability is worse than in a22: two of three seeds collapse at d3 (0.34, 0.38), only seed 43 (0.91) looks a18-normal. Bracketed targets are meaningfully harder to optimize at the 22k × 64 step budget calibrated for flat a18 targets. The CP axis is a18-parity (CP d3 = 0.380 vs 0.410), confirming no cross-axis collateral damage. a23 closes out the minimum-invasive member of the decoder-output-structural family: &gt; <em>Making depth visible as a surface token in the output stream does &gt; not crack the past-d6 wall, and actively regresses in-support depth &gt; recursion through the additional token-placement burden it imposes &gt; on the decoder.</em> Combined with a19 (visible depth at the input) and a21+a22 (visible depth in self-attention), the three "make depth visible" interventions jointly fail. The architectural residue is not representational — it is operational. The decoder needs <em>structural operations</em> for emitting recursive output, not merely a depth signal to attend to.</li>
+</ol>
+<h4 id="lateral-damage-and-the-canonical-ordering-leak">Lateral damage and the canonical-ordering leak</h4>
+<p>Attempt 11 also showed substantial lateral damage: <code>prim_to_obj_proper</code> dropped 90% → 46%, <code>pp_dative_to_do_dative</code> 30% → 2%. We initially read this as a coverage-shift bias. Attempt 12 shows this was mostly a CP-canonical-corruption leak: with canonical LFs, Gen recovers to 67.28% (1.5pp below attempt 09's 68.84% baseline). The coverage-shift bias is real but small.</p>
+<h3 id="7-6-cross-position-the-distributional-component-attempt-14">7.6 Cross-position: the distributional component (attempt 14)</h3>
+<p>After a13 established the depth axes as inductive-bias-bound rather than coverage-bound, the <code>obj_pp_to_subj_pp</code> category remained. Unlike the depth axes, this category does not test extrapolation to deeper structures; it tests transfer of a known structure (PP modification) to a new syntactic position (subject). The training set contains roughly 10,000 object-PP examples and zero subject-PP examples. A targeted test of the distributional hypothesis for this category was therefore a two-line synthesis: take any common-noun-subject training sentence, insert <code>PREP DET NOUN</code> after the subject noun, shift all LF indices past the insertion point by +3, and add the corresponding <code>subj.nmod.prep(x_1, x_4)</code> and tail-noun predicates.</p>
+<p><strong>Attempt 14</strong> registered five pre-commit thresholds (primary: <code>obj_pp_to_subj_pp ≥ 0.30</code>). 1600 synthesized subject-PP examples (800 at depth 1 + 800 at depth 2) were appended to train, all else identical to attempt 12's architecture. Results:</p>
+<table>
+<thead><tr><th>Metric</th><th>Attempt 13</th><th>Attempt 14</th></tr></thead>
+<tbody>
+<tr><td>IID</td><td>99.49%</td><td>99.46%</td></tr>
+<tr><td>Gen aggregate</td><td>61.08%</td><td><strong>71.68%</strong> <em>(program best)</em></td></tr>
+<tr><td><code>obj_pp_to_subj_pp</code></td><td>0.00%</td><td><strong>80.43% ± 1.1pp</strong></td></tr>
+<tr><td><code>pp_recursion</code></td><td>0.055</td><td>0.032</td></tr>
+<tr><td><code>cp_recursion</code></td><td>0.055</td><td>0.003</td></tr>
+</tbody></table>
+<p>Primary threshold cleared by 2.7×. All three seeds fall in [0.792, 0.813] with std 0.011 — the effect is near-deterministic. The flat 0% across 13 prior attempts was distributional, not architectural: the model could route a PP modifier to the subject position as long as any training signal at all existed for that position.</p>
+<p>This is the paper's first PASS verdict on a wall category. a14 required no architectural change; all interventions in attempts 08 and 09 (pointer-generator, ALiBi) remained in place, but the 1600 new training examples are the sole responsible factor. The depth axes were unaffected (pp_recursion 0.03, cp_recursion 0.003) — a14's synth targeted position, not depth. The cost was ≈84 GPU-minutes total.</p>
+<h4 id="interpretation-paired-with-attempt-13">Interpretation, paired with attempt 13</h4>
+<p>Attempts 13 and 14 together decompose the wall cleanly:</p>
+<table>
+<thead><tr><th>Axis</th><th>Synth volume</th><th>Primary threshold</th><th>Outcome</th><th>Wall mechanism</th></tr></thead>
+<tbody>
+<tr><td>Depth (pp/cp_recursion)</td><td>20000 examples</td><td><code>max(pp,cp)@d6 ≥ 0.20</code></td><td>FAIL (≤ 0.02)</td><td>Inductive-bias-bound</td></tr>
+<tr><td>Position (obj_pp→subj_pp)</td><td>1600 examples</td><td><code>≥ 0.30</code></td><td>PASS (0.80)</td><td>Distributional</td></tr>
+</tbody></table>
+<p>Both attempts used the same backbone (a09 architecture with ALiBi and pointer-generator), the same training protocol, and synthesis interventions generated by analogous parametric tail-extension procedures. The only difference is what the synthesis targets: depth extension vs. cross-position insertion. The contrast isolates the two mechanisms on categories that are superficially alike (both flat-0% "structural" gen categories in the original taxonomy).</p>
+<p>A follow-up claim: the per-depth curve of attempts 11–12 is also consistent with this decomposition. PP and CP recursion share the depth-bounded inductive-bias mechanism; <code>obj_pp_to_subj_pp</code>, despite being grouped with them in the original COGS taxonomy, shares the distributional-coverage mechanism of proper-noun gen categories (<code>prim_to_subj_proper</code>, etc.). The original three-category grouping conflates two different wall mechanisms.</p>
+<h4 id="the-two-interventions-compose-attempt-15">The two interventions compose (attempt 15)</h4>
+<p><strong>Attempt 15</strong> asked whether the two data-side interventions (a12 depth synthesis + a14 cross-position synthesis) compose. We concatenated the two synth files (6400 + 1600 = 8000 lines ≈ 25% of augmented train) and re-ran the a09 architecture unchanged. Five pre-committed thresholds.</p>
+<p>Results (3 seeds):</p>
+<table>
+<thead><tr><th>Metric</th><th>a12 alone</th><th>a14 alone</th><th><strong>a15 combined</strong></th><th>Additive prediction</th></tr></thead>
+<tbody>
+<tr><td><code>obj_pp_to_subj_pp</code></td><td>0.00</td><td>0.80</td><td><strong>0.84</strong></td><td>≈ 0.70</td></tr>
+<tr><td><code>pp_recursion</code></td><td>0.087</td><td>0.032</td><td><strong>0.123</strong> <em>(program best)</em></td><td>≈ 0.06</td></tr>
+<tr><td><code>cp_recursion</code></td><td>0.056</td><td>0.003</td><td>0.063</td><td>≈ 0.05</td></tr>
+<tr><td>Gen aggregate</td><td>0.673</td><td>0.717</td><td>0.663</td><td>≈ 0.72</td></tr>
+</tbody></table>
+<p><strong>5/5 pre-committed thresholds pass.</strong> The wall axes compose super-additively: <code>obj_pp_to_subj_pp</code> gains +3pp over the a14 single-intervention result, and <code>pp_recursion</code> gains +3.6pp over a12, establishing a new program best for that axis. The two data-side interventions have positive transfer to each other on the wall axes.</p>
+<p>The trade-off: aggregate Gen drops 5.4pp from a14. Per-seed analysis reveals a clean capacity-reallocation signature — wall-axis accuracies are deterministic across seeds (std 0.01–0.05), individual non-synth "Other" categories are seed-stochastic (std 0.17–0.48), and aggregate Gen itself is super-stable (std 0.002). Each seed sacrifices a <em>different</em> subset of non-synth categories (active_to_passive, dative alternations, unacc_to_transitive) to fit the wall-axis targets. The 1.2M-parameter backbone is at capacity for the 25%-synth-augmented training distribution; a scale ablation is registered as attempt 16.</p>
+<h4 id="scale-ablation-attempts-16-17-depth-axis-ceiling-is-partially-scale-sensitive">Scale ablation (attempts 16–17): depth-axis ceiling is partially scale-sensitive</h4>
+<p><strong>Attempt 16</strong> scales the a09 backbone 8× (d_model 128→256, heads 4→8, layers 2+2→4+4, ≈10M params) while holding the a15 synth mix and all other training hyperparameters constant. Six pre-committed thresholds. Verdict was STRUCTURED ADVANCE (3/6): wall-axis retention thresholds passed (<code>pp_recursion</code> mean 0.186, new program best) but capacity- recovery thresholds failed (aggregate Gen 0.643, <code>active_to_passive</code> std 0.385). A diagnostic surprise: all three seeds overfit past step ≈22–24k under the inherited 30000-step schedule; per-seed peak values (gen_agg 0.691, <code>pp_recursion</code> 0.213) substantially exceeded the fixed-30k finals. Peak values are post-hoc and not on their own protocol-anchorable.</p>
+<p><strong>Attempt 17</strong> is a pre-committed replay: identical architecture, identical synth mix, <code>max_steps = 22000</code> (below the overfitting knee observed in all three a16 seeds). Six pre-committed thresholds.</p>
+<p>Results (3 seeds at step 22000):</p>
+<table>
+<thead><tr><th>Metric</th><th>a12 (PP synth only, 1.2M)</th><th>a15 (1.2M combined)</th><th>a16 FINAL (10M, 30k)</th><th>a16 PEAK (post-hoc)</th><th><strong>a17 (10M, 22k pre-committed)</strong></th></tr></thead>
+<tbody>
+<tr><td><code>pp_recursion</code></td><td>0.087</td><td>0.123</td><td>0.186</td><td>0.213</td><td><strong>0.169 ± 0.017</strong> <em>(1.4× a15)</em></td></tr>
+<tr><td><code>cp_recursion</code></td><td>0.056</td><td>0.063</td><td>0.067</td><td>0.107</td><td>0.060 ± 0.007</td></tr>
+<tr><td><code>obj_pp_to_subj_pp</code></td><td>0.00</td><td>0.84</td><td>0.789</td><td>0.807</td><td><strong>0.839 ± 0.033</strong> <em>(then-best pre-committed cross-position value)</em></td></tr>
+<tr><td>Gen aggregate</td><td>0.673</td><td>0.663</td><td>0.643</td><td>0.691</td><td>0.662 ± 0.028</td></tr>
+<tr><td>IID</td><td>—</td><td>0.998</td><td>0.989</td><td>—</td><td>0.995</td></tr>
+</tbody></table>
+<p><strong>Verdict: PASS (6/6 thresholds).</strong> The a16 post-hoc peak finding is not a selection artifact: at 10M params with a 22k training schedule, <code>pp_recursion</code> sits at a reproducible 1.4× above a15's program-best 0.12, and <code>obj_pp_to_subj_pp</code> at 0.839 is the highest cross-position value in the program. <code>pp_recursion</code> std of 0.017 is the tightest wall-axis stability we have seen.</p>
+<p><code>cp_recursion</code> at 22k lands at a15 parity (0.060) rather than near the a16 peak (0.107); the 22k cutoff underfits the CP trajectory in seeds 42 and 44. This is a specific caveat — <code>cp_recursion</code> remains the stickiest wall axis across all interventions.</p>
+<p><strong>Interpretation.</strong> Three refinements, now supported by a pre-committed result:</p>
+<ol>
+<li><em>Depth-axis ceiling is not purely inductive-bias-bound.</em> Neither coverage scaling alone (a13, 3.1× synth volume) nor scale alone would lift the ceiling, but coverage + scale together does: <code>pp_recursion</code> rises along the trajectory 0.09 → 0.12 → 0.17 across a12/a15/a17 (all pre-committed). Coverage is necessary but not sufficient; capacity is necessary but not sufficient; their combination moves the ceiling by ≈1.4×.</li>
+<li><em>Cross-position axis is scale-invariant.</em> <code>obj_pp_to_subj_pp</code> saturates near 0.84 across both scales (a14 at 1.2M: 0.80; a17 at 10M: 0.84). The distributional fix did not need capacity headroom.</li>
+<li><em>Training-length × scale is a genuine interaction.</em> a15 at 1.2M uses 30k steps without overfitting; a16 at 10M overfits past ≈22k with the same schedule; a17 at 22k clears all six thresholds. Constant-step scale ablations systematically under-report the capability of a larger model when the smaller model is schedule- saturated and the larger one is not. Capacity-reallocation persists at 10M under both a16 and a17 with the same seed-stochastic signature observed at 1.2M (a17 <code>active_to_passive</code> std = 0.346). This is consistent with either (a) 10M is still at capacity for the 25%-synth training distribution, or (b) the lateral- loss allocation is an optimization-trajectory property of the loss landscape rather than a raw capacity bound.</li>
+</ol>
+<h3 id="7-7-why-the-null-is-a-contribution">7.7 Why the null is a contribution</h3>
+<p>COGS has been a touchstone benchmark for compositional-generalization claims in small transformers since 2020. Many architectural papers report aggregate Gen improvements without per-category breakdowns or pre-committed thresholds. Our sweep shows that the aggregate metric hides a sharper decomposition: some categories are architecturally fixable with small decoder-side changes (proper nouns, function words), one apparently structural category is fixed by a tiny targeted data intervention (<code>obj_pp_to_subj_pp</code>), shallow recursion inside trained support is helped by synthesis plus scale, and deep recursive emission remains at the floor under a long list of controls. A paper that reports only aggregate Gen cannot distinguish these regimes. A pre-committed, per-category protocol can.</p>
+<h2 id="8-discussion">8. Discussion</h2>
+<h3 id="8-1-three-decompositions-from-one-benchmark">8.1 Three decompositions from one benchmark</h3>
+<p>This program's interventions yield three nested decompositions of COGS generalization, each confirmed by an explicit pre-committed experiment.</p>
+<p><strong>(a) Aggregate vs per-category.</strong> Aggregate Gen numbers conflate distinct failure modes. Our per-category pre-committed protocol distinguishes (i) lexical-routing wins, (ii) already-solvable "Other" category improvements, and (iii) actual movement on the wall categories — all of which can produce similar aggregate lifts.</p>
+<p><strong>(b) Lexical routing vs structural extrapolation.</strong> Lexical-routing failures (which input token is routed to which output position?) respond to standard decoder-side architectural changes — pointer-generator copy mechanism and relative positional encoding. Structural-extrapolation failures (generate a structure not seen at training) do not respond to any of the five architectural interventions we tested, and a pre-committed length-clipping control rules out the most obvious alternative explanation.</p>
+<p><strong>(c) Three-way decomposition of the structural wall.</strong> The three "wall" categories are not one phenomenon. Three pre-committed experiments jointly isolate three mechanisms.</p>
+<p><em>Cross-position failure (<code>obj_pp_to_subj_pp</code>) is fully distributional.</em> Attempt 14 (1600 subject-PP examples) lifts this category from flat 0% to 80.4% mean in a single pre-committed shot at 1.2M params; attempt 17 holds it at 0.84 at 10M — scale-invariant.</p>
+<p><em>Depth-axis accuracy within trained support (d3..d6) is capacity-bound.</em> Attempt 13 (20000 examples, coverage scaling at 1.2M) does not lift any depth. Attempt 17 (8× scale at fixed coverage) multiplies each depth's in-support accuracy by 7-17× relative to a12. Coverage alone does not help; scale does.</p>
+<p><em>Depth-axis accuracy past d6 — both out-of-support and even in-support when trained at d7..d9 — is architectural.</em> Attempt 18 provides 800 training examples each at depths d7, d8, and d9 on the same 10M backbone, and gets <code>d9 = 0.000</code> across all three seeds for both PP and CP axes. d7 and d8 extract only 0.010-0.020 from their 800 examples. This is the strongest architectural null in the program: direct supervision at a specific depth produces no gen-set lift at that depth.</p>
+<p><em>The architectural bottleneck is not an input-representation gap.</em> Attempt 19 is a pre-committed control that directly tests whether the past-d6 failure is caused by the encoder lacking an explicit per-token depth signal. We add a single learned <code>Embedding(16, 256)</code> summed with the input token embedding, with <code>depth_id[i]</code> set to the count of <code>{in, on, beside, that}</code> tokens strictly before position <code>i</code>. The rest of the architecture (ALiBi, pointer-generator), the 10M backbone, the 22k-step schedule, and the 12800-line a18 synth are held fixed. PP d7 stays at 0.017, PP d9 stays at 0.000 — identical to a18 within noise. Unexpectedly, in-support depths <em>regress</em> (PP d4 0.54 → 0.39, d5 0.21 → 0.06, d6 0.06 → 0.02): the model uses the depth index as a shortcut feature for memorizing training templates rather than learning a more compositional mapping. The cross-position axis is retained (obj_pp_to_subj_pp 0.78) and IID accuracy is preserved, so the effect is specific to depth, not a general-training failure. a19 therefore closes out the natural next confound — that the transformer simply lacked a clean depth signal — and narrows the remaining architectural candidate to decoder-side recursive composition.</p>
+<p><em>The architectural bottleneck is also not crossed by another 4× in scale.</em> Attempt 20 pushes parameters from 10M to 32M (d_model 256 → 512, heads 8 → 16) while holding the a18 synth, schedule, and architecture (ALiBi + pointer-generator, no depth embedding) fixed. The log-linear extrapolation from a15 (1.2M) → a17 (10M) — which predicted <code>pp_recursion</code> ≈ 0.29 and PP d5 ≈ 0.43 at 32M — is falsified on every wall metric. PP d7 lands at 0.013 (below a18's 0.017), PP d9 at 0.000, in-support depths regress by 15–27pp (PP d4 0.54 → 0.28, d5 0.21 → 0.06). Combined with a19 this demonstrates that within the transformer-sequence-to-sequence family and the scale range we tested (1.2M, 10M, 32M — 27× total range), past-d6 failure is not scale-bound; the capacity lift from 1.2M to 10M hits a ceiling at the 10M/22k point rather than continuing as a smooth scaling law.</p>
+<p><em>The architectural bottleneck is also not fixed by either a substitutive or an additive decoder-self-attention depth bias.</em> Attempts 21 and 22 are the program's two decoder-side architectural interventions on the past-d6 wall. On the same 10M backbone and the a18 12800-line synth, we replace head 0's ALiBi position-distance bias (head 0 is the smallest-slope and therefore the longest-range ALiBi head) with a depth-distance bias using the count of <code>nmod</code>+<code>ccomp</code> output tokens as the depth signal. The 7 other heads are left intact. Parameter count is identical to a18. The past-d6 axes are not lifted (PP d7 = 0.010, PP d9 = 0.000 — essentially the same floor as a18), and in-support depths modestly regress: PP d3 falls 0.867 → 0.797, d4 0.543 → 0.443, d5 0.207 → 0.133. Per- seed d3 is [0.91, 0.61, 0.87] — seed 43 is a visible outlier and the regression is closer to a18-parity for seeds 42 and 44. The effect size is within the program's familiar lateral-variance range. The mechanism we originally proposed — that head 0's shallow slope was a load-bearing long-range continuity channel whose substitution collapsed in-support accuracy — is not supported by the corrected numbers (see retraction note in §7). The milder interpretation is that replacing head 0's position bias with a depth bias loses a small amount of useful positional signal without recovering generalization past d6. <code>obj_pp_to_subj_pp</code> is retained at 0.853 (program best) because its tests are short. a21 therefore does not rule out the broader "decoder-side depth-aware attention" hypothesis on its own, only the <em>substitution</em> implementation of it.</p>
+<p>Attempt 22 tests the <em>additive</em> formulation. All 8 ALiBi heads retain their position bias; head 0 additionally receives a learnable <code>−α · |depth(i) − depth(j)|</code> term with α initialized to head 0's ALiBi slope. Parameter count is a18 + 1. Pre-committed thresholds match a21's (P1 PP d7 ≥ 0.10, P2 PP d9 ≥ 0.03, P3 pp_rec ≥ 0.25, S1 PP d3 ≥ 0.75 as a direct falsifier of "additive preserves positional bandwidth," S2 PP d5 ≥ 0.18, R1/R2/R3 retention). a22 is REJECTED 3/8 by the same P1/P2/P3 triad, and its per-seed split is instructive. Seeds 43 and 44 sit at PP d3 0.89/0.91, at or above a18's 0.867; seed 42 sits at 0.31 with IID 0.987 (the other two at 0.997/0.998). For 2 of 3 seeds additive depth bias does exactly what the plan predicted — preserves in-support accuracy while not helping past-d6 — and for the third the model finds a degraded optimum. Crucially, the final learned α per seed is [0.605, 0.602, 0.578], all <em>above</em> the 0.5 initialization. The clean-null prediction pre-registered in the a22 plan ("if depth is useless, α learns toward 0") is decisively refuted: the model actively uses the depth signal, and past-d6 stays at 0 anyway. Combined with a21, <strong>decoder self-attention equipped with a depth-distance bias under either substitutive or additive formulations fails to cross past-d6</strong>.</p>
+<p>Attempt 23 tests the minimum-invasive output-structural intervention that follows naturally from the a21+a22 rule-out: do not modify how the decoder <em>attends</em>, modify <em>what it emits</em>. Target LFs are rewritten so every <code>nmod</code>/<code>ccomp</code> subtree is wrapped in <code>[...]</code>; the unclosed-bracket count at any emission position is then exactly the current nesting depth. Two tokens are added to the output vocabulary and the parameter budget is a18 + 0.01%. Under the hypothesis that past-d6 failure reflects an absent visible depth register, a23 should lift past-d6; under the null it should be neutral or mildly harmful. a23 is <strong>REJECTED 3/8</strong>: P1 fails at PP d7 = 0.010, P2 fails at PP d9 = 0.000, P3 fails at pp_rec = 0.092 (program worst). More informatively, calibration thresholds S1 (PP d3 ≥ 0.75) and S2 (PP d5 ≥ 0.18) also fail, with PP d3 dropping 32pp below a18 (0.867 → 0.543) and d4/d5 dropping 26/13pp. Two of three seeds collapse at d3 ([0.38, 0.91, 0.34]). Bracketing is <em>actively harmful</em> in-support because the decoder must learn to place <code>[</code> and <code>]</code> at the correct positions — making depth visible on the output stream does not sidestep the structural learning problem, it reifies it. Combined with a19 (depth visible at input) and a21+a22 (depth visible in attention), the three "make depth visible" interventions jointly fail. The architectural residue is not in how the decoder attends over its own emitted prefix, nor in what tokens the decoder emits; the remaining candidate is the decoder's <em>structural operations</em> for emitting recursive output — tree decoding, stack augmentation, production-rule emission, or pointer-copy-to-open-modifier.</p>
+<p>Two sibling data-side interventions at the same backbone (a13 scaling up d3..d6 coverage, a14 cross-position synthesis) produce opposite pre-committed outcomes. A scale-matched follow-up (a17) cleanly attributes in-support depth-accuracy to capacity <em>up to a ceiling between 10M and 32M</em> (a20). A coverage-matched depth-extension (a18) cleanly attributes past-d6 failure to architecture. An input-side architectural control (a19) cleanly attributes the past-d6 architectural residue to decoder-side composition rather than input representation. A scale-follow-up (a20) rules out that the residue lives above 10M parameters. The original COGS three-category "structural" grouping merged categories with three mechanistically different failure modes.</p>
+<h3 id="8-2-trade-offs-we-did-not-expect">8.2 Trade-offs we did not expect</h3>
+<p>Attempts 08 and 09 introduced regressions in specific "Other" categories that are worth flagging honestly:</p>
+<table>
+<thead><tr><th>Category</th><th>03 baseline</th><th>07 (last pre-copy)</th><th>08 (ptrgen)</th><th>09 (ALiBi+ptr)</th></tr></thead>
+<tbody>
+<tr><td><code>passive_to_active</code></td><td>0.92</td><td>0.95</td><td>0.35</td><td>0.64</td></tr>
+<tr><td><code>pp_dative_to_do_dative</code></td><td>0.81</td><td>0.85</td><td>0.63</td><td>0.30</td></tr>
+<tr><td><code>unacc_to_transitive</code></td><td>0.81</td><td>0.81</td><td>0.47</td><td>0.47</td></tr>
+<tr><td><code>obj_omitted_transitive_to_transitive</code></td><td>0.81</td><td>0.68</td><td>0.55</td><td>0.62</td></tr>
+</tbody></table>
+<p>Copy and ALiBi each help lexical-routing categories at measurable cost to structural-transform categories (passive↔active, dative alternation, argument-structure alternations). We do not have a full mechanistic account of these regressions, but the pattern is consistent: the copy mechanism biases the decoder toward emitting surface-order predicates, which is correct for proper-noun routing but <em>wrong</em> for categories that require re-ordering or re-labeling input predicates. A paper claiming architectural wins on COGS should always report the full 21-category matrix, not just the winners.</p>
+<h3 id="8-3-why-the-protocol-changes-the-result">8.3 Why the protocol changes the result</h3>
+<p>The most consequential moment in this program was between attempts 07 and 08. Attempts 03–07 had produced steady +3pp aggregate improvements on the common axis while proper-axis performance oscillated around 50%. Under a conventional protocol, the next step would have been "attempt 08: more encoder capacity" or "attempt 08: combine 05 and 07 more carefully." Instead we ran a 30-GPU-minute linear probe, observed the 99%-vs-50% gap, and redirected the entire program to decoder-side interventions. That redirect produced both the program's two wins (attempts 08, 09). A protocol that forbade the probing diagnostic — or that treated it as optional — would almost certainly have spent the rest of our budget on encoder variants at diminishing returns.</p>
+<h3 id="8-4-why-the-protocol-also-rejected-our-best-attempt">8.4 Why the protocol also <em>rejected</em> our best attempt</h3>
+<p>Attempt 09 is formally REJECTED by the pre-commit protocol: 3 of 6 registered criteria passed; the three that failed were the ones we registered as our core claim. The function-word gate collapse (which now looks like the paper's most interesting finding) was a post-hoc observation. Under the protocol, we report the failure of the registered hypothesis first, flag the post-hoc story separately, and do not conflate them. This is the cost of the methodology: even when you uncover an interesting effect, you have to admit that you did not predict it, and call that attempt rejected.</p>
+<h3 id="8-5-scope-and-scale-caveats">8.5 Scope and scale caveats</h3>
+<p>The program is still small-model research. Most attempts use a 1.2M or 10M parameter Transformer; one control reaches 32M. Published systems with much larger models, tree-structured decoders, neuro-symbolic components, or broader data augmentation can reach substantially higher COGS scores. We therefore do not claim that deep recursion is impossible in general. The claim is narrower: within this linearized Transformer seq2seq family, and under the registered interventions tested here, PP/CP recursion past roughly depth 6 remains at the floor even with direct synthetic supervision and explicit depth visibility.</p>
+<p>The small scale is also what makes the protocol feasible. Each attempt costs roughly one to three H100-hours across three seeds, so the program can afford many falsifiable attempts instead of a single expensive run.</p>
+<h3 id="8-6-extensions-after-the-original-sweep">8.6 Extensions after the original sweep</h3>
+<p>Attempts 11-23 are the pre-committed extensions added after the original architectural sweep closed. In brief:</p>
+<ol>
+<li><strong>Attempt 11 (GECA-lite, naive).</strong> 6400 synth examples at depths 3–6 on both PP and CP axes. REJECTED: PP axis moved to 7%, CP stayed at 0%. Post-hoc we traced the CP null to an ordering bug in our synthesized LFs (§7.5).</li>
+<li><strong>Attempt 12 (canonical-LF fix).</strong> Single-line correction to attempt 11. CP unlocks to 5.6% aggregate; both axes show clean monotonic depth-decay curves. STRUCTURED ADVANCE: Gen recovered to 67.28%.</li>
+<li><strong>Attempt 13 (coverage scaling).</strong> 800 → 2500 examples per depth. REJECTED on thresholds; coverage did not lift any depth, confirming the depth-axis modal-decay is an inductive-bias property (§7.5).</li>
+<li><strong>Attempt 14 (cross-position synthesis).</strong> 1600 subject-PP examples at depth 1–2. PASS: <code>obj_pp_to_subj_pp</code> 0% → 80.4% mean, aggregate Gen 71.68% (program best). First PASS on a wall category; confirms that the cross-position failure is distributional, not architectural (§7.6).</li>
+<li><strong>Attempt 15 (combined synthesis).</strong> Concatenation of a12 depth synth and a14 subject-PP synth (8000 lines, 25% of augmented train). PASS (5/5 thresholds). Super-additive gains on both wall axes: <code>pp_recursion</code> 0.09 → 0.12 (new program best), <code>obj_pp_to_subj_pp</code> 0.80 → 0.84, <code>cp_recursion</code> 0.06 (matches a12). Lateral regressions on non-synth categories drop Gen aggregate to 0.66; per-seed analysis shows the lateral loss is seed-stochastic capacity reallocation rather than systematic. Motivates scale ablation (§7.6).</li>
+<li><strong>Attempt 16 (scale ablation).</strong> Same a15 synth mix, backbone scaled to ≈10M params (8×). STRUCTURED ADVANCE (3/6 thresholds): wall-axis retention passes at scale, capacity-recovery thresholds fail. <code>pp_recursion</code> reaches 0.19 (new program best, 1.5× a15); <code>cp_recursion</code> 0.07; <code>obj_pp_to_subj_pp</code> 0.79 (scale-invariant). Lateral-loss signature persists. Diagnostic surprise: all three seeds overfit past step ≈22-24k with the inherited 30k-step schedule. Per-seed peak values (pp_recursion 0.21, gen_agg 0.691) are post-hoc and not protocol-anchorable on their own.</li>
+<li><strong>Attempt 17 (pre-committed replay at 22k steps).</strong> Same 10M backbone and 8000-synth mix; <code>max_steps = 22000</code> registered before training. PASS (6/6 thresholds). <code>pp_recursion = 0.169 ± 0.017</code> (reproducibly 1.4× a15), <code>obj_pp_to_subj_pp = 0.839</code> (then-best pre-committed cross-position value), Gen aggregate 0.662 recovers above a15. Confirms that the scale- sensitive depth-axis ceiling is a real effect, not a selection artifact. <code>cp_recursion</code> at 0.060 lands at a15 parity — the 22k cutoff underfits its trajectory, and it remains the stickiest wall axis across every intervention.</li>
+<li><strong>Attempt 18 (depth-extension test).</strong> Same 10M backbone and 22k schedule; synth extended from d3..d6 to d3..d9 (800 per depth per axis, 12800 total). Seven pre-committed thresholds with PP d7 ≥ 0.05 as the decisive H1/H2 criterion. REJECTED on primary (3/7): PP d7 = 0.017, PP d8 = 0.010, <strong>PP d9 = 0.000</strong> across all three seeds (same pattern on CP). The model was given 800 direct training examples at d9 and produced zero gen-set accuracy at that depth. This rules out the coverage-of-support interpretation: past-d6 depth failure is architectural, not distributional. Aggregate Gen fell 2.8pp due to increased synth load, but <code>pp_recursion</code> and <code>cp_recursion</code> aggregates barely moved (0.171 vs 0.169; 0.068 vs 0.060) — the added training signal did not transfer to the gen split at any depth.</li>
+<li><strong>Attempt 19 (input-side depth embedding).</strong> Same 10M backbone, same 12800-line a18 synth, same 22k schedule. Architectural intervention: add a learned <code>Embedding(16, 256)</code> summed with the input token embedding; <code>depth_id[i]</code> is the number of <code>{in, on, beside, that}</code> tokens strictly before position <code>i</code>. Seven pre-committed thresholds with PP d7 ≥ 0.10 as the decisive criterion. REJECTED on primary (3/7): PP d7 = 0.017 (identical to a18); PP d9 = 0.000; PP d4 <em>regresses</em> 0.54 → 0.39, d5 0.21 → 0.06 — the model exploits the depth index as a memorization shortcut for in-support training templates without gaining any capability past d6. Cross-position, IID, and gen_agg non-decisive thresholds pass. This attempt rules out the input-representation-gap hypothesis: the encoder already has access to the depth signal (via <code>in/on/beside/that</code> tokens through self-attention), and providing a cleaner learned copy cannot lift generalization past d6. The remaining architectural candidate is decoder-side recursive composition.</li>
+<li><strong>Attempt 20 (4× further scale, pure scale ablation).</strong> Same a18 architecture (ALiBi + pointer-generator, no depth embedding), same 12800-synth mix, same 22k-step schedule. Backbone scaled from 10M to 32M (d_model 256 → 512, heads 8 → 16, head_dim 32 unchanged, layers 4+4, batch 48 — reduced from 64 to fit 80GB H100). Actual params 31,082,712. Eight pre-committed thresholds with PP d7 ≥ 0.10 (decisive) and PP d7 ≥ 0.03 (soft) as H1-vs- null tests, driven by the log-linear extrapolation from a15 → a17. REJECTED on primary (3/8): PP d7 = 0.013, PP d9 = 0.000, <code>pp_recursion</code> aggregate 0.110 (below a18's 0.171); in-support depths <em>regress</em> 15–27pp (PP d4 0.54 → 0.28, d5 0.21 → 0.06). R1/R2/R3 (cross-position ≥ 0.75, gen_agg ≥ 0.55, iid ≥ 0.99) pass, but seed 43 IID falls to 0.981, signaling capacity strain. The log-linear extrapolation from a15/a17 (which predicted pp_recursion ≈ 0.29 and PP d5 ≈ 0.43) is falsified: the scale response between 10M and 32M is not a continuation of the scale response between 1.2M and 10M. Interpretation favors undertraining at batch 48 combined with capacity-reallocation compounded at 32M: the larger model spends capacity on memorizing finer-grained training templates rather than extracting deeper structure. This attempt is the program's fifth pre-committed rule-out — past-d6 failure is not crossed by coverage (a13), scale alone (a17), coverage-of-deep-support (a18), input-side depth feature (a19), or 4× more scale at the extended-depth regime (a20). The architectural residue is localized to decoder-side recursive composition, within the transformer-sequence-to-sequence family at 1.2M–32M parameters (27× total scale range).</li>
+<li><strong>Attempt 21 (decoder self-attention depth-aware, head-replacement).</strong> Same 10M backbone, same a18 12800-line synth, same 22k schedule. Architectural intervention (first decoder-side intervention on the past-d6 wall): replace the decoder self-attention's ALiBi position-distance bias on <em>head 0</em> — the smallest-slope, longest-range ALiBi head — with a depth-distance bias, where depth at each decode position is the count of <code>nmod</code>+<code>ccomp</code> output tokens emitted so far. The remaining 7 heads are unchanged; parameter count is identical to a18. Eight pre-committed thresholds with PP d7 ≥ 0.10 (decisive), PP d9 ≥ 0.03, and <code>pp_recursion</code> ≥ 0.25 as the decisive criteria. REJECTED on primary (3/8): all three primaries fail. Mild in-support regression: PP d3 0.867 → 0.797, d4 0.543 → 0.443, d5 0.207 → 0.133; past-d6 essentially unchanged (d7 0.010, d9 0.000). Per-seed d3 is [0.91, 0.61, 0.87] — seed 43 is a visible outlier and the effect is closer to a18-parity for seeds 42 and 44. <code>obj_pp_to_subj_pp</code> is retained at 0.853 (program best) because its tests are short. The original findings (filed same day) reported catastrophic regression (d3 → 0.183); that was a train/eval bug — the intervention's activation flag was a plain Python attribute not restored by <code>load_state_dict</code>, so eval silently ran standard ALiBi on weights trained with depth bias. The corrected numbers show a modest perturbation rather than a collapse, with the same REJECTED verdict (P1/P2/P3 all still fail). This rules out the <em>substitution</em> formulation of decoder-side depth-aware self-attention but does not rule out the broader hypothesis: <em>additive</em> formulations (add depth-bias as an extra term on head 0, or add a 9th head with depth bias) remain untested and are the natural a22.</li>
+<li><strong>Attempt 22 (decoder self-attention depth-aware, additive formulation).</strong> Same 10M backbone, same a18 12800-line synth, same 22k schedule. All 8 ALiBi heads retain their position bias; head 0 additionally receives <code>−α · |depth(i) − depth(j)|</code> with α a single learnable scalar initialized to head 0's ALiBi slope. Parameter count = a18 + 1 scalar. Eight pre-committed thresholds with P1 PP d7 ≥ 0.10 (decisive), P2 PP d9 ≥ 0.03, P3 pp_rec ≥ 0.25 as decisive; S1 PP d3 ≥ 0.75 as direct falsifier of "additive preserves positional bandwidth"; S2 PP d5 ≥ 0.18; R1/R2/R3 retention. REJECTED on primary (3/8): P1/P2/P3 all fail. Per-depth PP means: d3 0.703, d4 0.393, d5 0.157, d6 0.013, d7 0.010, d9 0.000. Per-seed d3 is [0.31, 0.89, 0.91]; seed 42 is a clear outlier (IID 0.987 vs 0.998/0.997 for the others), and for seeds 43/44 a22 sits at or above a18-parity on PP d3. Learned α per seed is [0.605, 0.602, 0.578] — a consistent 20% upward drift from the 0.5 initialization, decisively refuting the clean-null prediction ("if depth is useless, α → 0"): the model actively uses the depth signal. Despite that, PP d7 = 0.010, PP d9 = 0.000, identical to a18/a19/a20/a21. Past-d6 is invariant under decoder self-attention depth bias in either formulation. Combined with a21, <strong>decoder-self-attention depth-bias interventions — substitutive AND additive — fail to crack the past-d6 wall</strong>. Seven pre-committed decoder/input/scale/coverage rule-outs now stand (a13, a17, a18, a19, a20, a21, a22); the remaining architectural candidate is decoder-<strong>output</strong>- structural.</li>
+<li><strong>Attempt 23 (bracketed-LF output, decoder-output-structural minimum-invasive).</strong> Same 10M backbone, same a18 12800-line synth, same 22k schedule. Target LFs are rewritten so every <code>nmod</code>/ <code>ccomp</code> subtree is wrapped in <code>[...]</code>: the unclosed-bracket count at any emission position is exactly the current nesting depth. Output vocabulary grows by 2 tokens (727 → 729); total parameter count = 8,070,873 (a18 + 0.01%). No attention change. Eight pre-committed thresholds identical in spirit to a21/a22. REJECTED on primary (3/8): P1 (PP d7 ≥ 0.10) fails at 0.010; P2 (d9 ≥ 0.03) fails at 0.000; P3 (pp_rec ≥ 0.25) fails at 0.092 (program worst on this axis). Calibration S1 (PP d3 ≥ 0.75) fails at 0.543 and S2 (PP d5 ≥ 0.18) fails at 0.077; R1 (obj_pp 0.850), R2 (gen_agg 0.662), and R3 (iid 0.995) pass. Per-depth PP d3 [0.38, 0.91, 0.34] — two of three seeds collapse at d3. The result is decisive in a direction we did not pre-expect: bracketing is not neutral but actively <em>harmful</em> in-support (PP d3 −32pp, d4 −26pp, d5 −13pp vs a18), because emitting <code>[</code> and <code>]</code> at the right positions is itself an output-structural learning problem that making depth visible does not sidestep. Past-d6 is unchanged (PP d7/d8/d9 = 0.010/0.010/ 0.000, identical to a18–a22). a23 closes the minimum-invasive output-structural intervention. <strong>Making depth visible in input (a19), in self-attention (a21 + a22), or in output (a23) all fail</strong> — the architectural residue is not representational but <em>operational</em>, requiring structural decoder mechanisms (tree, stack, production-rule, pointer-to-open-modifier) rather than a depth signal to attend to or emit. The data-side findings jointly establish that the apparent three-category "structural wall" is two mechanistically distinct phenomena: a depth-axis wall that is coverage×scale-sensitive within trained depths (neither coverage alone via a13 nor scale alone would move it; their combination lifts <code>pp_recursion</code> along the trajectory 0.09 → 0.12 → 0.19 across a12/a15/a16/a17, but the trajectory stalls and regresses at 32M in a20 — the capacity lift has a ceiling at or near the 10M/22k point), and a cross-position wall that is purely distributional and already saturated at the 1.2M-parameter regime (800–1600 targeted examples close it entirely; 8× and 32× scale both leave it unchanged). The two interventions compose super-additively on wall axes. Further progress on the depth axes' post-training-distribution transfer (generalization past the deepest trained depth) remains open: modal-decay radius stays at ≈0 steps beyond trained depth at 10M and 32M. Broader-scope augmentation (full GECA) or decoder-side architectural changes targeting explicit structural operations (tree, stack, production-rule, or pointer-to-open- modifier decoding) are the remaining candidates. The cross-position axis is effectively closed by 1600 targeted synthesis examples at any scale we have tested.</li>
+</ol>
+<h3 id="8-7-what-we-still-have-not-run-and-would">8.7 What we still have not run, and would</h3>
+<p>Two follow-ons would further refine the story:</p>
+<ol>
+<li><strong>Structural-operation decoders (tree, stack, production-rule, pointer-to-open-modifier).</strong> a19 rules out the input-representation gap; a21 and a22 jointly rule out decoder self-attention depth bias in either substitutive or additive formulation; <strong>a23 rules out the minimum-invasive output-structural intervention</strong> — a visible surface-token depth register regresses in-support depth recursion by up to 32pp without lifting past-d6, because emitting the bracket at the right moment is itself a structural learning problem. Across three "make depth visible" interventions (input embedding, attention bias, output token), the hypothesis that past-d6 is representational is decisively refuted: the architectural residue is <em>operational</em>. The remaining candidates all equip the decoder with explicit structural operations rather than a depth signal to attend to:</li>
+</ol>
+<ul>
+<li><strong>Tree decoder.</strong> Emit nodes with explicit left/right child pointers; subtree nesting is a first-class decoding operation.</li>
+<li><strong>Stack-augmented decoder.</strong> Explicit push/pop operations on a differentiable stack whose state is part of the hidden representation; <code>nmod</code>/<code>ccomp</code> marker tokens gate push, and subtree closure gates pop.</li>
+<li><strong>Production-rule decoder.</strong> Emit grammar productions rather than surface tokens; tree structure is implicit in the production sequence, and each production's applicability is constrained by the partial tree.</li>
+<li><strong>Pointer-copy-to-open-modifier.</strong> Pointer-generator variant where the copy distribution attends not only to input tokens but to previously-emitted open modifiers awaiting closure. Implementation cost for any of these is substantial and the intervention departs from the small-transformer baseline, so we flag it as follow-on work.</li>
+</ul>
+<ol>
+<li><strong>Pre-registered function-word intervention</strong> (ALiBi + a gate regularizer that explicitly encourages copy for function words). This would convert the attempt-09 post-hoc finding into a pre-registered one. We flag these as future work for the same reason as before: running them without registration would undermine the protocol that is the paper's central methodological commitment.</li>
+</ol>
+<h2 id="9-conclusion">9. Conclusion</h2>
+<p>We ran a twenty-three-attempt pre-committed program on COGS. The resulting picture is not "architecture works" or "architecture fails." It is a decomposition.</p>
+<p>Encoder-side factorization was the wrong locus for lexical identity: proper-noun identity was already recoverable from the encoder at 99%. Decoder-side copy then produced the first proper-noun routing win, and ALiBi plus copy produced an unregistered but repeatable-looking function-word routing shift. Those are lexical-routing effects, not structural recursion.</p>
+<p>The structural categories split further. <code>obj_pp_to_subj_pp</code> was a distributional hole and was largely fixed by 1600 targeted subject-PP examples. PP/CP recursion inside trained depth support moved only when targeted synthesis was paired with 10M-scale capacity. PP/CP recursion past roughly depth 6 remained at the floor under direct d7-d9 supervision, explicit input depth features, 32M scale, decoder depth-attention biases, and bracketed output LFs.</p>
+<p>The remaining failure is therefore operational rather than representational: the linearized Transformer decoder does not acquire a robust recursive emission operation from these interventions. The next serious tests are not more ways to mark depth, but decoders that manipulate structure directly: tree, stack, production-rule, or pointer-to-open-modifier decoders.</p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; <span data-year>2026</span> Teng Cao.</p>
+    <a href="../blog.html">Back to notes</a>
+  </footer>
+
+  <script src="../script.js"></script>
+</body>
+</html>

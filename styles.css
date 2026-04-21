@@ -451,6 +451,10 @@ h3 {
   padding: 150px 0 86px;
 }
 
+.article-main.wide-article {
+  width: min(1040px, calc(100% - 48px));
+}
+
 .article h1 {
   margin: 0;
   font-size: clamp(2.35rem, 6vw, 4.6rem);
@@ -467,6 +471,21 @@ h3 {
   font-size: clamp(1.55rem, 3vw, 2.1rem);
 }
 
+.article h3,
+.article h4 {
+  margin-top: 34px;
+}
+
+.article ul,
+.article ol {
+  color: var(--muted);
+  padding-left: 1.4rem;
+}
+
+.article li + li {
+  margin-top: 0.45rem;
+}
+
 .article code {
   padding: 0.12rem 0.34rem;
   border: 1px solid var(--line);
@@ -474,6 +493,30 @@ h3 {
   background: #ffffff;
   color: var(--blue);
   font-size: 0.95em;
+}
+
+.article table {
+  display: block;
+  width: 100%;
+  margin: 24px 0;
+  overflow-x: auto;
+  border-collapse: collapse;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.article th,
+.article td {
+  min-width: 120px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.article th {
+  color: var(--ink);
+  background: #edf4f1;
 }
 
 @media (max-width: 820px) {
