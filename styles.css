@@ -486,6 +486,24 @@ h3 {
   margin-top: 0.45rem;
 }
 
+.flow-figure {
+  margin: 32px 0;
+}
+
+.flow-figure img {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf6;
+  box-shadow: 0 14px 32px rgba(23, 32, 38, 0.08);
+}
+
+.flow-figure figcaption {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
 .article code {
   padding: 0.12rem 0.34rem;
   border: 1px solid var(--line);
