@@ -31,10 +31,26 @@
 <h1 id="lexical-routing-distributional-repair-and-a-recursive-depth-residue">Lexical Routing, Distributional Repair, and a Recursive-Depth Residue</h1>
 <h3 id="a-pre-committed-twenty-three-attempt-sweep-of-small-transformers-on-cogs">A Pre-Committed Twenty-Three-Attempt Sweep of Small Transformers on COGS</h3>
 <p><em>Draft — not yet formatted for submission.</em></p>
-<figure class="flow-figure">
-  <img src="../assets/lexical-routing-flow.svg" alt="Simplified flowchart of the COGS intervention sweep">
-  <figcaption>A simplified view of the draft's main arc: pre-committed attempts, diagnostic decomposition, decoder-side lexical routing wins, and the remaining deep-recursion residue.</figcaption>
-</figure>
+<div class="diagram-block">
+  <div class="mermaid">
+flowchart TD
+  A["23 pre-committed attempts"] --> B["Failure diagnosis"]
+  B --> C["Encoder probe"]
+  C --> D["Decoder routing bottleneck"]
+  D --> E["Pointer-generator copy"]
+  D --> F["ALiBi gate shift"]
+  E --> G["Lexical routing improves"]
+  F --> G
+  G --> H["Residual structural wall"]
+  H --> I["Distributional repair"]
+  H --> J["Shallow recursion"]
+  H --> K["Deep recursion residue"]
+  I --> L["Three-part decomposition"]
+  J --> L
+  K --> L
+  </div>
+  <p class="diagram-caption">A compact map of the draft's main arc: diagnostic probing, decoder-side lexical fixes, and the remaining split between distributional repair, shallow recursion, and deep recursion.</p>
+</div>
 <hr>
 <h2 id="1-introduction">1. Introduction</h2>
 <p>Architectural interventions for compositional generalization in small transformers are difficult to interpret from aggregate accuracy alone. On COGS, SCAN, and related benchmarks, a single Gen number can rise because a model learned lexical copying, because a held-out syntactic position became covered by the training distribution, or because it genuinely learned a recursive rule. Those are different mechanisms, but they are often reported as the same kind of "compositional generalization" improvement.</p>
@@ -679,5 +695,26 @@
   </footer>
 
   <script src="../script.js"></script>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      themeVariables: {
+        background: "#ffffff",
+        primaryColor: "#edf4f1",
+        primaryTextColor: "#172026",
+        primaryBorderColor: "#254b7c",
+        lineColor: "#5d6872",
+        secondaryColor: "#fbfaf6",
+        tertiaryColor: "#ffffff",
+        fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+      },
+      flowchart: {
+        curve: "basis"
+      }
+    });
+  </script>
 </body>
 </html>

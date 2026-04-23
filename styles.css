@@ -486,20 +486,28 @@ h3 {
   margin-top: 0.45rem;
 }
 
-.flow-figure {
+.diagram-block {
   margin: 32px 0;
-}
-
-.flow-figure img {
-  width: 100%;
+  padding: 18px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbfaf6;
+  background: #ffffff;
   box-shadow: 0 14px 32px rgba(23, 32, 38, 0.08);
 }
 
-.flow-figure figcaption {
-  margin-top: 10px;
+.mermaid {
+  overflow-x: auto;
+}
+
+.mermaid svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.diagram-caption {
+  margin: 14px 0 0;
   color: var(--muted);
   font-size: 0.95rem;
 }

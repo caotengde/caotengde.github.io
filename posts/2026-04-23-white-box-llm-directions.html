@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>White-Box LLM Directions: Structure, Generality, and Constraint | Teng Cao</title>
+  <meta name="description" content="An adapted discussion note on white-box LLM directions, knowledge as structure, internal programming interfaces, and reasoning as constraint.">
+  <link rel="canonical" href="https://caotengde.github.io/posts/2026-04-23-white-box-llm-directions.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header compact" data-header>
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true">TC</span>
+      <span>Teng Cao</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="../index.html#research">Research</a>
+      <a href="../index.html#projects">Projects</a>
+      <a href="../index.html#publications">Publications</a>
+      <a href="../blog.html">Notes</a>
+      <a href="https://scholar.google.com/citations?user=rGbSMkcAAAAJ&amp;hl=zh-CN" target="_blank" rel="noreferrer">Scholar</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main class="article-main">
+    <article class="article">
+      <p class="note-date">2026-04-23</p>
+      <h1>White-Box LLM Directions: Structure, Generality, and Constraint</h1>
+      <p class="article-lead">An adapted English note from a longer internal discussion memo on what a serious white-box language model agenda would actually require.</p>
+
+      <p>This note comes from a long discussion that started with a narrow question about a <code>symbolicLLM</code> project and ended in a much harder place: what counts as a real research direction if the goal is not just another tooling layer around large language models, but a system that is more controllable, more interpretable, and maybe one day closer to general intelligence.</p>
+      <p>The original memo was written in Chinese on April 17, 2026. What appears here is a public English adaptation that keeps the ideas, trims repetition, and turns the most useful arguments into a note that is easier to revisit.</p>
+
+      <h2>Discussion Arc</h2>
+      <p>The discussion moved through five linked questions:</p>
+      <ol>
+        <li>Why the current project story still feels fragile under review.</li>
+        <li>What "white-box LLM" would mean from first principles.</li>
+        <li>Whether knowledge should be treated as symbols, structures, or executable world models.</li>
+        <li>Whether generality comes from language, from architecture, or from the constraints imposed on computation.</li>
+        <li>What kind of research life this line of work actually asks for.</li>
+      </ol>
+
+      <h2>1. Why the Current Story Still Feels Fragile</h2>
+      <p>The starting point was not abstract. It was a practical discomfort with the current <code>symbolicLLM</code> narrative. Distillation sounded too close to "LLM-generated parallel data plus supervised training." The multi-engine breadth was impressive, but also easy for reviewers to attack if some tasks looked weak or overly templated. Even the strongest headline, a smaller system matching or exceeding a much larger LLM on deductive tasks, still risked being read as a benchmark-specific win rather than a durable conceptual advance.</p>
+      <p>The useful outcome of this first layer was not despair. It was a sharper question: if the aim is really a white-box language model, then what exactly is being white-boxed? Language understanding, knowledge storage, reasoning, or only the last mile of execution?</p>
+
+      <h2>2. What a White-Box LLM Agenda Would Actually Need</h2>
+      <p>A language model bundles at least three different functions:</p>
+      <ul>
+        <li><strong>Language interface</strong>: mapping natural language into an internal usable representation.</li>
+        <li><strong>Knowledge substrate</strong>: storing regularities about the world.</li>
+        <li><strong>Reasoning runtime</strong>: transforming inputs and stored structure into outputs.</li>
+      </ul>
+      <p>A serious white-box agenda would have to make an explicit choice about which of these functions remain neural and which become inspectable, editable, or verifiable. The conversation kept returning to one asymmetry: a small neural translator may be acceptable, but if knowledge and reasoning stay implicit in the model weights, then the system is not really white-box. It is only less black-box than a fully end-to-end LLM.</p>
+      <p>This led to an important reframe. A white-box system is not just one with logs, traces, or tool calls. It is one where the state that matters for answering a question is available for inspection, revision, and constraint.</p>
+
+      <h2>3. Knowledge as Structure, Not Only Symbols</h2>
+      <p>One of the strongest moves in the memo was the shift away from treating knowledge as a bag of explicit symbols. The better formulation was: perhaps knowledge is fundamentally <strong>structure</strong>. Symbols can encode structure, but they are not the only substrate that can do so, and by themselves they do not carry meaning. Meaning comes from operational role, causal consequence, invariance, and the ability to support intervention.</p>
+      <p>From that perspective, "white-boxing" an LLM does not necessarily mean extracting if-then rules or triples. It may mean extracting executable structure: causal graphs, compositional programs, latent factorized operators, or world-model fragments that can be run, edited, composed, and validated.</p>
+      <blockquote>
+        <p>The most useful version of the claim was not "knowledge is symbolic." It was "knowledge is structure, and structure can be re-instantiated in different substrates."</p>
+      </blockquote>
+      <p>This shift matters because it changes the target of interpretability. Instead of asking whether we can recover neat human-readable symbols from a model, we ask whether we can recover the operative structure that makes the model succeed or fail.</p>
+
+      <h2>4. Generality Is Not Free</h2>
+      <p>A large part of the memo wrestled with the seductive idea that chain-of-thought is the only truly general reasoning medium because it stays inside language. That argument initially sounds powerful: the model is pretrained on language, so exposing its intermediate computation in language should preserve its full expressive range.</p>
+      <p>But the discussion later corrected itself. Chain-of-thought often looks more general than it really is. It fails on exact counting, symbolic bookkeeping, deep compositional generalization, and tasks where the verbal rationale can drift away from the actual internal decision process. A fluent natural-language trace is not the same thing as a faithful computational trace.</p>
+      <p>The counterpoint is equally uncomfortable for symbolic systems. A finite symbolic interface does not inherit the open-ended coverage that language models appear to have. If every new concept has to be hand-designed into an intermediate representation, the system will always lag behind the open world.</p>
+      <p>The conclusion was not that one side wins. It was that <strong>generality depends on both medium and mechanism</strong>. Language is powerful, but unconstrained language is not enough. Formal structure is reliable, but a fixed formal structure is not enough either.</p>
+
+      <h2>5. Stop Building Only Outside the Model</h2>
+      <p>The most provocative section of the discussion came from flipping the viewpoint inward. Instead of treating the LLM as a monolithic oracle to be wrapped by external tools, what if the interesting research problem is how to program the model internally?</p>
+      <p>That line of thought treated the modern transformer less like a mysterious text generator and more like an unprogrammed processor. Residual streams act like a shared workspace. Attention heads route information. MLPs provide distributed key-value memory. Circuits and sparse autoencoder features reveal recurring computational atoms. On that view, black-boxness is not purely architectural. It is also a consequence of how we choose to use the model.</p>
+      <blockquote>
+        <p>The black-box quality is not an architectural property of LLMs. It is a property of the current usage pattern.</p>
+      </blockquote>
+      <p>This does not mean the field has discovered a clean internal instruction set already. It has not. But it does point to a more ambitious agenda than prompt engineering plus tools: discover internal operators, define reliable interfaces for them, and compile higher-level intentions into interventions or circuit-level programs.</p>
+
+      <h2>6. Why the Feedback Loop Is So Hard</h2>
+      <p>Another thread in the memo asked whether discovered structure could feed back into the neural model itself. The hope was intuitive: if a model can externalize structure, perhaps that structure can then stabilize or improve the model's own reasoning.</p>
+      <p>The discussion pushed back on a naive version of this loop. If the extracted structure contains no information beyond what the model already knows, then feeding it back is mostly a stabilizer, not a growth engine. To get real gains, the loop must open outward. Structure needs to connect the model to something beyond its current state: new environment feedback, new external data, new executable programs, or new forms of validation that the model did not already possess.</p>
+      <p>That produced a memorable formulation: structure is best understood as an interface between the model and the world, not just a mirror held up to the model.</p>
+
+      <h2>7. Reasoning Is Better Viewed as Constraint</h2>
+      <p>The most durable idea in the entire discussion was probably the simplest one:</p>
+      <blockquote>
+        <p>Reasoning is not one capability. It is a set of constraints.</p>
+      </blockquote>
+      <p>This reframes a lot. Symbolic systems look strong in narrow domains because they are tightly constrained. Language models look broad because they are weakly constrained. Human reasoning seems powerful not because it floats above structure, but because it can combine flexible representation with strong task-dependent constraints.</p>
+      <p>On this view, the central research question is not "how do we bolt a reasoning module onto a model?" It is "how do we impose the right constraints on a flexible high-capacity model so that its behavior stays coherent across tasks?" That is a very different agenda from producing longer rationales or more tool calls.</p>
+
+      <h2>8. Three Research Postures</h2>
+      <p>The memo ended in a more personal place. Once the technical fog clears a little, there is still a human decision left: what kind of researcher is this agenda asking you to become?</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Posture</th>
+            <th>What it optimizes for</th>
+            <th>Main risk</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Craftsperson</td>
+            <td>Builds narrow, useful, verification-heavy systems that actually work.</td>
+            <td>May never touch the deeper AGI question.</td>
+          </tr>
+          <tr>
+            <td>Theorist</td>
+            <td>Clarifies the problem, reads deeply, and sharpens conceptual frames.</td>
+            <td>Can become elegant without becoming generative.</td>
+          </tr>
+          <tr>
+            <td>Empiricist gambler</td>
+            <td>Bets on long-horizon experiments, scale, and architectural risk.</td>
+            <td>Needs resources, commitment, and tolerance for long stretches of failure.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>The uncomfortable insight was that mixing all three identities at once often leads to drift. If the project is supposed to be a bridge to AGI, the bridge has to be built with a real choice of posture, not just a romantic combination of ambitions.</p>
+
+      <h2>9. Readings That Kept Their Value</h2>
+      <p>Five references continued to anchor the discussion even after many claims were softened or corrected:</p>
+      <ul>
+        <li>Fodor and Pylyshyn, 1988, on systematicity and classical compositional structure.</li>
+        <li>Gärdenfors, <em>Conceptual Spaces</em>, on geometry as an intermediate substrate between symbols and vectors.</li>
+        <li>Pearl, <em>Causality</em>, on intervention and counterfactual structure.</li>
+        <li>Lake et al., 2017, on compositionality, model building, and learning-to-learn.</li>
+        <li>Smolensky, <em>Harmonic Mind</em>, on tensor product structure and the attempt to reconcile symbolic and distributed views.</li>
+      </ul>
+      <p>These works do not solve the current problem. What they do is stop the discussion from pretending the problem was invented yesterday.</p>
+
+      <h2>10. Lines Worth Keeping</h2>
+      <ul>
+        <li>"The apparent generality of LLMs is dynamic rather than static: it is the ability to compose knowledge from context."</li>
+        <li>"The historical weakness of symbolic systems may be a natural-language mapping problem more than a reasoning problem."</li>
+        <li>"Black-boxness is partly a usage pattern, not only a model property."</li>
+        <li>"Continuous reframing can become a form of procrastination."</li>
+        <li>"Stop only asking how to build around the model. Ask what it would mean to program inside it."</li>
+        <li>"Reasoning quality rises when the space of allowed moves is constrained in the right way."</li>
+      </ul>
+
+      <h2>Closing Note</h2>
+      <p>This discussion did not produce a clean research program. In a way, that was the point. It replaced several attractive but vague stories with a more demanding set of choices. If there is one practical lesson worth carrying forward, it is this: the next useful step is probably not another round of abstract reframing. It is a concrete experiment that commits to one level of the problem and stays there long enough to learn something real.</p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; <span data-year>2026</span> Teng Cao.</p>
+    <a href="../blog.html">Back to notes</a>
+  </footer>
+
+  <script src="../script.js"></script>
+</body>
+</html>
