@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NocsFM: One-Shot Flow Matching for NOCS-Based 6D Pose Estimation | Teng Cao</title>
+  <meta name="description" content="NocsFM: One-Shot Flow Matching for NOCS-Based 6D Pose Estimation.">
+  <link rel="canonical" href="https://caotengde.github.io/posts/2026-05-13-nocsfm-one-shot-flow-matching-for-nocs-based-6d-pose-estimation.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header compact" data-header>
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true">TC</span>
+      <span>Teng Cao</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="../index.html#research">Research</a>
+      <a href="../index.html#publications">Publications</a>
+      <a href="../blog.html">Notes</a>
+      <a href="https://scholar.google.com/citations?user=rGbSMkcAAAAJ&amp;hl=zh-CN" target="_blank" rel="noreferrer">Scholar</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main class="article-main wide-article">
+    <article class="article">
+      <p class="note-date">2026-05-13</p>
+      <p class="article-utility"><a class="text-link" href="#citation">Jump to citation <span aria-hidden="true">-&gt;</span></a></p>
+<h1 id="nocsfm-one-shot-flow-matching-for-nocs-based-6d-pose-estimation">NocsFM: One-Shot Flow Matching for NOCS-Based 6D Pose Estimation</h1>
+
+<h2 id="abstract">Abstract</h2>
+<p>Accurate pose estimation and tracking are crucial for physical AI systems such as robots. However, existing methods typically require a predefined model or category. In addition, they often rely on manually annotated segmentation masks of the target in the first frame, which is labor-intensive and leads to degraded performance when facing occlusion or fast motion.To address these issues, we propose NocsFM — a novel pose estimation framework. This system adopts a two-stage pipeline that integrates object detection and pose estimation. It can simultaneously detect the target object’s position and generate its mask and NOCS map. The map is then aligned using Umelaya for point-cloud registration to obtain the pose estimation. NocsFM is trained on the Camera dataset and achieves excellent performance.</p>
+
+<hr />
+<p><img src="https://caotengde.github.io/nocs/images/workflow.png" alt="workflow" /></p>
+<h2 id="1-introduction">1. Introduction</h2>
+<p>Estimating the six degrees of freedom (6D) rigid-body transformation between an object and a camera—commonly referred to as object pose estimation—is a core problem underpinning a wide range of perception–control tasks in robotics, augmented reality, and human–machine interaction (Hinterstoisser et al., 2012; Xiang et al., 2018). Despite notable progress in data-driven approaches and deep geometric learning in recent years (Wang et al., 2019; He et al., 2020), existing methods still face structural bottlenecks when deployed in real-world environments.</p>
+
+<p>First, mainstream paradigms are predominantly based on instance-level modeling, in which object-specific features or templates are constructed for predefined targets (Rad &amp; Lepetit, 2017). Such paradigms lack invariance to shape and topology, leaving the models poorly generalizable when confronted with novel categories or significant appearance variations. Second, many approaches rely heavily on strong priors or manual interventions—such as precisely annotated masks, bounding boxes, or initial pose hints—to guarantee convergence of subsequent geometric optimization (Sundermeyer et al., 2018). These strict prior requirements not only increase the human and perceptual cost of deployment but also substantially degrade robustness under occlusion, fast motion, or illumination changes. At their root, these limitations reflect a structured dependence on high-quality reference information, which stands in sharp contrast to the open-world requirement for annotation-free and template-free operation.</p>
+
+<p>Moreover, a large body of existing algorithms still presupposes access to accurate 3D CAD models or high-fidelity geometric templates of the target objects (Hodan et al., 2020). While such assumptions may hold in controlled laboratory settings, they are prohibitively expensive and unsustainable in large-scale industrial or unstructured outdoor scenarios: they inflate the cost of data acquisition, modeling, and storage, and they curtail real-time adaptability and reconfigurability in dynamic or cluttered environments. To address these challenges, researchers have explored two promising directions:</p>
+
+<ul>
+  <li><strong>Flow matching</strong>, a recent generative technique for learning continuous transformations (Lipman et al., 2022), provides a powerful way to model the dense correspondence between 2D image observations and 3D object geometry, thereby improving both pose estimation accuracy and robustness to occlusion.</li>
+  <li><strong>Normalized Object Coordinate Space (NOCS)</strong> representations (Wang et al., 2019) map every object pixel to a normalized canonical space, enabling category-level generalization and metric-scale 6D pose recovery without the need for exact 3D models.</li>
+</ul>
+
+<p>Combining these strengths offers a compelling path forward for practical industrial applications.</p>
+
+<p>In this study, we propose NocsFM—a unified framework for category-level 6D pose estimation and persistent object tracking. Our approach fully exploits the high-dimensional, cross-view invariant semantic representations provided by DINOv3 to achieve robust multi-view association and feature correspondence. Building on this foundation, it seamlessly integrates generative flow matching with Normalized Object Coordinate Space (NOCS) representations, establishing an end-to-end geometric reasoning pipeline that maps a single RGB reference image to metric-scale 3D space. Through this pipeline, NocsFM simultaneously performs object mask prediction, category-level NOCS mapping, and rigid 6D pose estimation without requiring any object-specific CAD models or pre-defined templates. Furthermore, the system leverages the predicted masks as an online feedback signal to realize adaptive cross-frame association and robust long-term tracking, thereby completely eliminating manual re-initialization and maintaining high accuracy under dynamic occlusions and complex backgrounds.</p>
+
+<p><strong>Main contributions:</strong></p>
+<ul>
+  <li><strong>Unified framework for pose estimation and tracking.</strong> Requires only one reference image to continuously track objects and estimate their 6D poses in real time.</li>
+  <li><strong>First use of flow matching on NOCS.</strong> Pioneers the application of flow matching within the NOCS representation, enabling robust and category-level 6D pose estimation directly from RGB images.</li>
+  <li><strong>Joint mask prediction and pose estimation.</strong> Couples mask prediction with pose estimation, enabling fully automated object tracking and reducing the dependency on external detectors or handcrafted priors.</li>
+</ul>
+
+<p>By unifying feature matching, flow-based geometric reasoning, and NOCS-based 3D representation, <strong>NocsFM</strong> advances object pose estimation towards truly generalizable and deployment-ready solutions for robotics, augmented reality, and industrial automation.</p>
+
+<hr />
+
+<h2 id="2-related-work">2. Related Work</h2>
+
+<h3 id="21-6d-pose-estimation">2.1 6D Pose Estimation</h3>
+<p>6D object pose estimation aims to recover the complete 3D translation and rotation of a target object from one or more RGB/RGB-D images and is a core technology for robotic manipulation, augmented reality, and industrial automation (Hoďaň et al., 2018). Existing approaches can broadly be categorized into geometry-/template-based methods and learning-based methods. Geometry- and template-based approaches typically rely on known CAD models and classical geometric optimisation. Early work exploited keypoint matching combined with Perspective-n-Point (PnP) solutions (Lepetit et al., 2009) or Iterative Closest Point (ICP) registration for fine alignment (Besl &amp; McKay, 1992). Subsequent studies improved robustness with stronger feature extraction and contour constraints to handle occlusion and background clutter (Kehl et al., 2017; Xiang et al., 2018). Nevertheless, these methods remain sensitive to lighting variation, partial occlusion, and previously unseen objects, and they require precise 3D CAD models—conditions that hamper deployment in open-world scenarios. Learning-based approaches instead leverage convolutional neural networks (CNNs) or Transformers to directly regress object pose or detect 2D/3D keypoints, significantly improving robustness and accuracy. Representative methods include PoseCNN (Xiang et al., 2018), PVNet (Peng et al., 2019), and GDR-Net (Wang et al., 2021), as well as Transformer-based frameworks such as 6D-ViT (Zou et al., 2022) and PoET (Jantos et al., 2023). However, these approaches still typically demand large-scale annotated datasets, instance-level 3D models, or multi-view priors, and their ability to generalize to novel object categories remains limited.Recent work integrates large-scale vision foundation models and generative paradigms to overcome these limitations. For example, FoundationPose (Wen, Yang, Kautz &amp; Birchfield, 2024) exploits pre-trained universal visual features and multi-view consistency to achieve 6D pose estimation and tracking of novel objects, while DiffusionNOCS (Ikeda et al., 2024) combines diffusion-based generative modeling with the normalized object coordinate space (NOCS) representation to improve category-level generalisation and data efficiency. These advances highlight the potential of generative distribution learning and cross-modal priors to break the long-standing dependency on detailed geometric templates.</p>
+
+<h3 id="22-foundationpose">2.2 FoundationPose</h3>
+<p>FoundationPose represents a recent effort to incorporate large-scale vision foundation models into the 6D object pose estimation pipeline. By employing extensively pre-trained visual backbones as general-purpose feature extractors and fine-tuning with limited task-specific data, it achieves strong data efficiency and category-level generalization. Nevertheless, FoundationPose typically relies on accurate 3D CAD models or precise category annotations to initialize and constrain pose optimization, and its performance can degrade markedly in dynamic scenes characterized by fast motion, large viewpoint changes, or severe occlusion. These requirements restrict its applicability in fully open-set or real-time interactive environments. In sharp contrast, our proposed NocsFM does not require any object-specific 3D models or category labels. By tightly integrating flow matching with the Normalized Object Coordinate Space (NOCS) representation, NocsFM performs end-to-end inference from a single reference RGB image to category-level 6D pose estimation. The method automatically predicts object masks and supports continuous real-time tracking, completely eliminating the need for manual re-initialization and maintaining stable accuracy even under rapid motion or heavy occlusion. These properties make NocsFM particularly well suited to high-robustness, low-prior-dependency applications in robotic manipulation, augmented reality, and industrial automation.</p>
+
+<h3 id="23-diffusionnocs">2.3 DiffusionNOCS</h3>
+<p>DiffusionNOCS is a recent exploration of applying generative diffusion models to category-level 6D object pose estimation. By tightly coupling diffusion models with the Normalized Object Coordinate Space (NOCS) representation, it progressively denoises through reverse diffusion to generate normalized object coordinate fields, enabling explicit reconstruction of 3D geometry and pose without requiring precise CAD models. Compared with direct regression approaches, this generative paradigm demonstrates stronger geometric consistency and category-level generalization when dealing with significant shape variation or non-rigid deformations.However, DiffusionNOCS has several notable limitations. First, it requires accurate category labels to guide NOCS normalization and conditional modeling, restricting its applicability in open-set or unknown-category environments. Second, diffusion sampling can only be applied to cleanly segmented images, lacking inherent object detection or segmentation capability and thus relying on external detectors or manual masks. Third, the multi-step diffusion process incurs high computational cost and long inference time, and is prone to instability under noise, heavy occlusion, or cluttered backgrounds. These drawbacks limit its suitability for real-time robotic manipulation or augmented-reality applications that demand low latency.By contrast, our proposed NocsFM follows a different paradigm: it requires neither object-specific 3D models nor category labels and can directly generate masks and track object poses in real time from a single reference image, offering stronger practicality in dynamic and complex environments.</p>
+
+<hr />
+
+<h2 id="3-method">3. Method</h2>
+<p>NocsFM achieves model-free 6D pose estimation and real-time tracking within a single unified loop, requiring only a clean reference image of the target object and the current RGB frame as input. The system first employs DINOv3 pre-trained visual features to perform cross-view matching between the reference and current frames, automatically localizing the target in cluttered scenes and establishing an initial position together with reliable inter-frame correspondences. Next, it performs geometric reasoning by integrating latent flow matching with the Normalized Object Coordinate Space (NOCS) representation, mapping image pixels in the current frame directly to a normalized 3D coordinate space and estimating the object’s 6D pose through robust Umeyama optimization. Finally, a mask-based closed-loop mechanism continuously updates the target’s position and appearance features, enabling uninterrupted real-time tracking without manual intervention. Thanks to this end-to-end design, NocsFM can deliver stable and accurate pose and trajectory estimates in dynamic, cluttered environments without any object-specific 3D models or category labels.</p>
+
+<h3 id="31-dinov3-matching">3.1 DINOv3 Matching</h3>
+<p>Given a clean reference image <code class="language-plaintext highlighter-rouge">I_ref</code> and the current RGB frame <code class="language-plaintext highlighter-rouge">I_t</code>,<br />
+<strong>NocsFM</strong> first employs <strong>DINOv3</strong> as a visual backbone to extract multi-scale features from both images, yielding dense feature embeddings with spatial position encoding:</p>
+
+<p><img src="https://latex.codecogs.com/svg.image?%5CPhi_%7B%5Cmathrm%7Bref%7D%7D%5Cin%5Cmathbb%7BR%7D%5E%7BC%5Ctimes%20H_s%5Ctimes%20W_s%7D" alt="equation" /></p>
+
+<p><img src="https://latex.codecogs.com/svg.image?%5CPhi_t%5Cin%5Cmathbb%7BR%7D%5E%7BC%5Ctimes%20H_s%5Ctimes%20W_s%7D" alt="equation" /></p>
+
+<p>where <code class="language-plaintext highlighter-rouge">C</code> is the channel dimension and <code class="language-plaintext highlighter-rouge">H_s</code>, <code class="language-plaintext highlighter-rouge">W_s</code> denote the downsampled spatial resolution.</p>
+
+<p>Next, a dense cross-image similarity map is constructed using cosine similarity:</p>
+
+<p><img src="https://latex.codecogs.com/svg.image?S(u,v)=\max_{(i,j)}\frac{\langle\hat{\Phi}_{\mathrm{ref}}(:,i,j),\hat{\Phi}_t(:,u,v)\rangle}{\|\hat{\Phi}_{\mathrm{ref}}(:,i,j)\|_2\cdot\|\hat{\Phi}_t(:,u,v)\|_2}" alt="equation" /></p>
+
+<p>where <img src="https://latex.codecogs.com/svg.image?\hat{\Phi}" alt="equation" /> denotes L2-normalized feature vectors.</p>
+
+<p>To improve matching reliability, <strong>mutual nearest neighbor (MNN)</strong> filtering is applied, retaining only pairs that are each other’s nearest matches:</p>
+
+<p><img src="https://latex.codecogs.com/svg.image?%5Cmathcal%7BM%7D%3D%5C%7B(i%2Cj%2Cu%2Cv)%5Cmid%20(i%2Cj)%3D%5Carg%5Cmax_%7Bi%27%2Cj%27%7D%20S_%7Bt%5Cto%5Cmathrm%7Bref%7D%7D(u%2Cv%2Ci%27%2Cj%27)%20%5Cland%20(u%2Cv)%3D%5Carg%5Cmax_%7Bu%27%2Cv%27%7D%20S_%7B%5Cmathrm%7Bref%7D%5Cto%20t%7D(i%2Cj%2Cu%27%2Cv%27)%5C%7D" alt="equation" /></p>
+
+<p>By thresholding the similarity map <code class="language-plaintext highlighter-rouge">S</code> and performing connected-component analysis,<br />
+the method obtains a foreground mask <code class="language-plaintext highlighter-rouge">M_t ⊆ [1,H] × [1,W]</code> of the target in the current frame.<br />
+The target center can then be computed, for example, by the bounding box of <code class="language-plaintext highlighter-rouge">M_t</code> or a soft-argmax over high-confidence regions,<br />
+and the corresponding object region is cropped as</p>
+
+<p><img src="https://latex.codecogs.com/svg.image?I_t%5E%7B%5Cmathrm%7Bcrop%7D%7D%3D%20I_t%20%5Codot%20M_t" alt="equation" /></p>
+
+<p>This cropped image is subsequently fed to the <strong>flow matching</strong> module for Normalized Object Coordinate Space (NOCS) estimation and final 6D pose recovery.</p>
+<h3 id="32-flow-matching-for-nocs-estimation">3.2 Flow Matching for NOCS Estimation</h3>
+<p>After obtaining a cropped target region from the reference-based localization stage,<br />
+the image patch is encoded by a <strong>Variational Autoencoder (VAE)</strong> fine-tuned from Stable Diffusion,<br />
+producing an initial latent variable</p>
+
+<p><img src="https://latex.codecogs.com/svg.image?z_0%20%3D%20%5Cmathrm%7BEnc%7D_%7B%5Cmathrm%7BVAE%7D%7D%28I_t%5E%7B%5Cmathrm%7Bcrop%7D%7D%29" alt="equation" /></p>
+
+<p>which provides a compact and geometry-preserving representation.</p>
+
+<p>Inside the latent space, <strong>latent flow matching</strong> directly learns a time-dependent vector field</p>
+
+<p><img src="https://latex.codecogs.com/svg.image?%5Cmathbf%7Bv%7D_%5Ctheta%28z%2Ct%29" alt="equation" /></p>
+
+<p>that governs the deterministic evolution of each point over continuous time</p>
+
+<p><img src="https://latex.codecogs.com/svg.image?%5Cfrac%7Bd%20z_t%7D%7Bd%20t%7D%20%3D%20%5Cmathbf%7Bv%7D_%5Ctheta%28z_t%2C%20t%29%2C%20%5Cquad%20t%5Cin%5B0%2C1%5D" alt="equation" />.</p>
+
+<p>Integrating this ordinary differential equation over ([0,1]) in a <strong>single pass</strong> yields the terminal latent state (z_1).<br />
+The VAE decoder then maps each terminal latent to a normalized 3D coordinate</p>
+
+<p><img src="https://latex.codecogs.com/svg.image?%5Cmathbf%7Bn%7D_p%20%3D%20%5Cmathrm%7BDec%7D_%7B%5Cmathrm%7BVAE%7D%7D%28z_1%28p%29%29" alt="equation" />,</p>
+
+<p>producing a dense <strong>NOCS map</strong></p>
+
+<p><img src="https://latex.codecogs.com/svg.image?N_t%20%3D%20%5C%7B%5Cmathbf%7Bn%7D_p%5C%7D_%7Bp%5Cin%20M_t%7D" alt="equation" /></p>
+
+<p>together with a sharp <strong>foreground mask</strong> (M_t).</p>
+
+<p>Using the camera depth map (D_t), pixels inside the mask are back-projected into 3D:</p>
+
+<p><img src="https://latex.codecogs.com/svg.image?%5Cmathbf%7Bx%7D_p%20%3D%20%5Cpi%5E%7B-1%7D%28p%2C%20D_t%28p%29%29" alt="equation" />.</p>
+
+<p>From the set of correspondences<br />
+<img src="https://latex.codecogs.com/svg.image?%5C%7B%28%5Cmathbf%7Bn%7D_p%2C%20%5Cmathbf%7Bx%7D_p%29%20%7C%20p%5Cin%20M_t%5C%7D" alt="equation" />,
+the <strong>Umeyama least-squares algorithm</strong> estimates the optimal similarity transform</p>
+
+<p><img src="https://latex.codecogs.com/svg.image?%5Cmin_%7Bs%2C%20%5Cmathbf%7BR%7D%2C%20%5Cmathbf%7Bt%7D%7D%20%5Csum_%7Bp%5Cin%20M_t%7D%5Cbigl%5C%7C%20s%20%5Cmathbf%7BR%7D%20%5Cmathbf%7Bn%7D_p%20%2B%20%5Cmathbf%7Bt%7D%20-%20%5Cmathbf%7Bx%7D_p%20%5Cbigr%5C%7C%5E2" alt="equation" />,</p>
+
+<p>yielding the final <strong>SE(3)</strong> pose:</p>
+
+<p><img src="https://latex.codecogs.com/svg.image?%5Cmathcal%7BT%7D%20%3D%20%5Cbegin%7Bbmatrix%7D%20s%20%5Cmathbf%7BR%7D%20%26%20%5Cmathbf%7Bt%7D%20%5C%5C%20%5Cmathbf%7B0%7D%5E%5Ctop%20%26%201%20%5Cend%7Bbmatrix%7D" alt="equation" />.</p>
+
+<p>This <strong>VAE encoding → latent flow integration → depth registration → Umeyama alignment</strong> pipeline<br />
+enables <strong>one-shot generation</strong> of a dense NOCS map, a foreground mask, and an accurate SE(3) pose,<br />
+all without requiring object-specific 3D models or category labels,<br />
+while ensuring <strong>real-time efficiency and high geometric accuracy</strong>.</p>
+
+<h3 id="33-tracking-with-mask-feedback">3.3 Tracking with Mask Feedback</h3>
+<p>The predicted foreground mask serves not merely as a per-frame output but also as a key structural component of the geometry–tracking pipeline. Firstly，by separating the object from a cluttered background at pixel-level precision, the mask provides high confidence observations for downstream 6D pose estimation, effectively suppressing background noise and improving geometric accuracy.
+Secondly，the mask is further used to automatically crop a new high-quality reference image<br />
+   <img src="https://latex.codecogs.com/svg.image?I_t^{5Cmathrm{ref}}" alt="equation" />,which captures the object’s latest appearance and scale.  This freshly generated reference is fed back into the next round of DINOv3 cross-view feature matching, continuously refreshing the system’s memory of the target.Through this predict-mask → update-reference → re-match cycle, <strong>NocsFM</strong> forms a closed-loop, temporally adaptive tracking system capable of long-term, fully automated operation without manual re-initialization, even under appearance changes or environmental disturbances.</p>
+
+<hr />
+
+<h2 id="4-experimental-evaluation">4. Experimental Evaluation</h2>
+
+<h3 id="41-setup">4.1 Setup</h3>
+<p>The experiments were carried out on an NVIDIA RTX 4090 GPU (24 GB memory).The entire method is implemented in PyTorch, where DINOv3 is used for feature extraction.
+The flow matching network was trained for 40 000 steps on the CAMERA275 dataset, and the overall method was subsequently trained and evaluated on the CAMERA dataset.</p>
+<h3 id="42-comparison-of-training">4.2 Comparison of training</h3>
+<p>Two losses are monitored during training:</p>
+
+<ul>
+  <li>
+    <p><strong>train_loss</strong> – the intrinsic loss of the <strong>flow matching</strong> network,<br />
+which predicts the latent velocity field.<br />
+It is defined as the mean squared error (MSE) between the predicted velocity<br />
+and the ground-truth derivative: <img src="https://latex.codecogs.com/svg.image?%5Cmathcal%7BL%7D_%7Btrain%7D%3D%5Cmathbb%7BE%7D_%7Bz_t%2Ct%7D%5Cbigl%5C%7C%5Cmathbf%7Bv%7D_%5Ctheta%28z_t%2Ct%29-%5Cfrac%7Bd%20z_t%7D%7Bd%20t%7D%5Cbigr%5C%7C_2%5E2" alt="equation" /></p>
+  </li>
+  <li>
+    <p><strong>sample_loss</strong> – the reconstruction loss computed after integrating the flow.<br />
+It measures the MSE between the predicted NOCS map<br />
+and the ground-truth NOCS: <img src="https://latex.codecogs.com/svg.image?\mathcal{L}_{sample}=\mathbb{E}_p\bigl\|\hat{\mathbf{n}}_p-\mathbf{n}_p\bigr\|_2^2" alt="equation" /></p>
+  </li>
+</ul>
+
+<p>The following plots show the evolution of these two losses over <strong>40 000 training steps</strong><br />
+for models trained <strong>with background (red)</strong> and <strong>without background (blue)</strong>:
+<img src="https://caotengde.github.io/nocs/images/train_loss.png" alt="train_loss" />
+<img src="https://caotengde.github.io/nocs/images/sample_loss.png" alt="sample_loss" /></p>
+
+<p><strong>Observations</strong></p>
+
+<p>Under both background-removed and background-retained settings, the two losses (train_loss and sample_loss) converge rapidly, indicating that the latent velocity field and the final NOCS reconstruction are effectively learned. The background-removed setting converges faster during the early training stages. However, by 40 000 steps the sample_loss is almost identical in both settings, showing that the final reconstruction accuracy differs very little. Moreover, when background is retained, the model not only learns the foreground mask prediction well but also accurately recovers the NOCS map, demonstrating that moderate background information does not hinder the final pose estimation quality.</p>
+<h3 id="43-qualitative-result-of-flow-matching-for-pose-estimation">4.3 Qualitative result of Flow Matching for Pose Estimation</h3>
+<p>The following figures present <strong>qualitative results</strong> at different training stages.
+The first pair shows the outputs after <strong>2 000 training steps</strong> with and without background.  Almost no visible changes can be observed at this early stage.
+<img src="https://caotengde.github.io/nocs/images/w2000.png" alt="image1" />
+<img src="https://caotengde.github.io/nocs/images/w:o2000.png" alt="image2" />
+The next pair shows the outputs after <strong>10 000 steps</strong>.  In the background-retained setting, the surrounding area gradually darkens while the center brightens,<br />
+indicating that the network is starting to learn <strong>mask prediction</strong>.  In contrast, the background-removed setting has already begun to learn <strong>color reconstruction</strong>.
+<img src="https://caotengde.github.io/nocs/images/w10000.png" alt="image3" />
+<img src="https://caotengde.github.io/nocs/images/w:o10000.png" alt="image4" />
+The last pair shows the outputs after <strong>40 000 steps</strong>.  Both settings achieve high-quality results that closely match the ground truth.
+<img src="https://caotengde.github.io/nocs/images/w40000.png" alt="image5" />
+<img src="https://caotengde.github.io/nocs/images/w:o40000.png" alt="image6" /></p>
+
+<h2 id="5-conclusion">5. Conclusion</h2>
+<p>We propose <strong>NocsFM</strong>, a unified framework for category-level 6D object pose estimation and tracking that directly processes <strong>RGB-D</strong> inputs, fully exploiting both color and depth information for high-precision and robust pose perception. The method integrates several key components: first, powerful representations from <strong>DINOv3</strong> enable cross-view feature matching between the reference image and the current frame, achieving automatic target localization and initialization; second, a <strong>one-shot latent flow matching</strong> mechanism efficiently establishes dense correspondences between observations and the Normalized Object Coordinate Space (<strong>NOCS</strong>) within a continuous latent space, producing high-resolution NOCS maps in a single pass; finally, a <strong>mask-driven closed-loop feedback</strong> continually updates object position and appearance, enabling uninterrupted tracking without human intervention. The entire pipeline requires only a single reference image and <strong>no object-specific CAD models or category labels</strong>, greatly reducing deployment complexity and data preparation costs. Extensive experiments on the <strong>CAMERA</strong> dataset demonstrate that NocsFM delivers outstanding accuracy, robustness, and long-term stability, providing a practical, deployment-ready solution for 6D pose estimation.
+We plan to further enhance the latent-space modeling capability of <strong>NocsFM</strong> by <strong>embedding point-cloud information directly into the latent representation</strong>, enabling the network to generate dense point clouds during inference. This improvement is expected to enrich 3D geometric details and supply structured input for downstream tasks such as point-cloud–based shape reconstruction, interactive manipulation, and fine-grained grasp planning, thereby extending the applicability of 6D pose estimation to a wider range of real-world scenarios.</p>
+<h2 id="6-reference">6. Reference</h2>
+<ul>
+  <li>Besl, P. J., &amp; McKay, N. D. (1992). A Method for Registration of 3-D Shapes. IEEE Transactions on Pattern Analysis and Machine Intelligence, 14(2), 239–256.</li>
+  <li>Hinterstoisser, S., Lepetit, V., Ilic, S., Holzer, S., Bradski, G., Konolige, K., &amp; Navab, N. (2012). Model Based Training, Detection and Pose Estimation of Texture-Less 3D Objects in Heavily Cluttered Scenes. In ACCV 2012 (pp. 548–562). Springer.</li>
+  <li>Kehl, W., Manhardt, F., Tombari, F., Ilic, S., &amp; Navab, N. (2017). SSD-6D: Making RGB-Based 3D Detection and 6D Pose Estimation Great Again. In ICCV 2017 (pp. 1521–1529).</li>
+  <li>Lepetit, V., Moreno-Noguer, F., &amp; Fua, P. (2009). EPnP: An Accurate O(n) Solution to the PnP Problem. International Journal of Computer Vision, 81(2), 155–166.</li>
+  <li>Rad, M., &amp; Lepetit, V. (2017). BB8: A Scalable, Accurate, Robust to Partial Occlusion Method for Predicting the 3D Poses of Challenging Objects without Using Depth. In ICCV 2017 (pp. 3828–3836).</li>
+  <li>Xiang, Y., Schmidt, T., Narayanan, V., &amp; Fox, D. (2018). PoseCNN: A Convolutional Neural Network for 6D Object Pose Estimation in Cluttered Scenes. In Robotics: Science and Systems (RSS) 2018.</li>
+  <li>Sundermeyer, M., Marton, Z.-C., Durner, M., Brucker, M., &amp; Triebel, R. (2018). Implicit 3D Orientation Learning for 6D Object Detection from RGB Images. In ECCV 2018 (pp. 712–729).</li>
+  <li>Hoďaň, T., Michel, F., Brachmann, E., Kehl, W., Buch, A. G., Kraft, D., … Rother, C. (2018). BOP: Benchmark for 6D Object Pose Estimation. In ECCV 2018 (pp. 19–35).</li>
+  <li>Wang, H., Sridhar, S., Huang, J., Valentin, J., Song, S., &amp; Guibas, L. J. (2019). Normalized Object Coordinate Space for Category-Level 6D Object Pose and Size Estimation. In CVPR 2019 (pp. 2642–2651).</li>
+  <li>Peng, S., Liu, Y., Huang, Q., Bao, H., &amp; Zhou, X. (2019). PVNet: Pixel-Wise Voting Network for 6DoF Pose Estimation. In CVPR 2019 (pp. 4561–4570).</li>
+  <li>He, Y., Huang, H., Fan, H., Chen, Q., &amp; Sun, J. (2020). PVN3D: A Deep Point-Wise 3D Keypoints Voting Network for 6DoF Pose Estimation. In CVPR 2020 (pp. 11632–11641).</li>
+  <li>Wang, G., Manhardt, F., Tombari, F., &amp; Ji, X. (2021). GDR-Net: Geometry-Guided Direct Regression Network for Monocular 6D Object Pose Estimation. In CVPR 2021 (pp. 16611–16621).</li>
+  <li>Zou, L., Huang, Z., Gu, N., &amp; Wang, G. (2022). 6D-ViT: Category-Level 6D Object Pose Estimation via Transformer-Based Instance Representation Learning. IEEE Transactions on Image Processing, 31, 6907–6921.</li>
+  <li>Jantos, T. G., Hamdad, M. A., Granig, W., Weiss, S., &amp; Steinbrener, J. (2023). PoET: Pose Estimation Transformer for Single-View, Multi-Object 6D Pose Estimation. In Proceedings of the 6th Annual Conference on Robot Learning (CoRL 2022), PMLR 205 (pp. 1259–1279).</li>
+  <li>Hoďaň, T., Sundermeyer, M., Drost, B., Labbe, Y., Brachmann, E., Michel, F., … Matas, J. (2020). BOP Challenge 2020 on 6D Object Localization. In ECCV 2020 Workshops (pp. 577–594).</li>
+  <li>Wen, B., Yang, W., Kautz, J., &amp; Birchfield, S. (2024). FoundationPose: Unified 6D Pose Estimation and Tracking of Novel Objects. In CVPR 2024 (pp. 17868–17879).</li>
+  <li>Ikeda, T., Zakharov, S., Ko, T., Irshad, M. Z., Lee, R., Liu, K., Ambrus, R., &amp; Nishiwaki, K. (2024). DiffusionNOCS: Managing Symmetry and Uncertainty in Sim2Real Multi-Modal Category-Level Pose Estimation. arXiv:2402.12647.</li>
+</ul>
+
+      <section class="citation-panel" id="citation" aria-labelledby="citation-title">
+        <p class="section-kicker">Citation</p>
+        <h2 id="citation-title">How to Cite This Note</h2>
+        <p class="citation-text">If you would like to reference this note, you can use the citation below or copy the BibTeX entry.</p>
+        <p><strong>Suggested citation.</strong> Cao, Teng. 2026. &ldquo;NocsFM: One-Shot Flow Matching for NOCS-Based 6D Pose Estimation.&rdquo; <em>Teng Cao Notes and Essays</em>, May 13, 2026. https://caotengde.github.io/posts/2026-05-13-nocsfm-one-shot-flow-matching-for-nocs-based-6d-pose-estimation.html.</p>
+        <pre class="citation-bibtex"><code>@misc{cao2026nocsfmnote,
+  author = {Cao, Teng},
+  title = {NocsFM: One-Shot Flow Matching for NOCS-Based 6D Pose Estimation},
+  year = {2026},
+  month = may,
+  day = {13},
+  note = {Research note},
+  url = {https://caotengde.github.io/posts/2026-05-13-nocsfm-one-shot-flow-matching-for-nocs-based-6d-pose-estimation.html}
+}</code></pre>
+      </section>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; <span data-year>2026</span> Teng Cao.</p>
+    <a href="../blog.html">Back to notes</a>
+  </footer>
+
+  <script src="../script.js"></script>
+</body>
+</html>
