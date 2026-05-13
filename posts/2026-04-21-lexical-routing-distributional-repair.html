@@ -685,6 +685,21 @@ flowchart TD
 <p>Encoder-side factorization was the wrong locus for lexical identity: proper-noun identity was already recoverable from the encoder at 99%. Decoder-side copy then produced the first proper-noun routing win, and ALiBi plus copy produced an unregistered but repeatable-looking function-word routing shift. Those are lexical-routing effects, not structural recursion.</p>
 <p>The structural categories split further. <code>obj_pp_to_subj_pp</code> was a distributional hole and was largely fixed by 1600 targeted subject-PP examples. PP/CP recursion inside trained depth support moved only when targeted synthesis was paired with 10M-scale capacity. PP/CP recursion past roughly depth 6 remained at the floor under direct d7-d9 supervision, explicit input depth features, 32M scale, decoder depth-attention biases, and bracketed output LFs.</p>
 <p>The remaining failure is therefore operational rather than representational: the linearized Transformer decoder does not acquire a robust recursive emission operation from these interventions. The next serious tests are not more ways to mark depth, but decoders that manipulate structure directly: tree, stack, production-rule, or pointer-to-open-modifier decoders.</p>
+<section class="citation-panel" id="citation" aria-labelledby="citation-title">
+  <p class="section-kicker">Citation</p>
+  <h2 id="citation-title">How to Cite This Note</h2>
+  <p class="citation-text">If you would like to reference this draft, you can use the citation below or copy the BibTeX entry.</p>
+  <p><strong>Suggested citation.</strong> Cao, Teng. 2026. &ldquo;Lexical Routing, Distributional Repair, and a Recursive-Depth Residue.&rdquo; <em>Teng Cao Notes and Essays</em>, April 21, 2026. Draft essay. https://caotengde.github.io/posts/2026-04-21-lexical-routing-distributional-repair.html.</p>
+  <pre class="citation-bibtex"><code>@misc{cao2026lexicalrouting,
+  author = {Cao, Teng},
+  title = {Lexical Routing, Distributional Repair, and a Recursive-Depth Residue},
+  year = {2026},
+  month = apr,
+  day = {21},
+  note = {Draft essay},
+  url = {https://caotengde.github.io/posts/2026-04-21-lexical-routing-distributional-repair.html}
+}</code></pre>
+</section>
     </article>
   </main>
 

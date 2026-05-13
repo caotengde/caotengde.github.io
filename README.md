@@ -40,4 +40,4 @@ https://caotengde.github.io
 - Site icon: `assets/favicon.svg`
 - Homepage hero image: `assets/academic-hero.png`
 
-To add a new note, duplicate an existing file in `posts/`, update the filename, title, date and body, then add links in `blog.html` and `index.html`.
+To add a new note, duplicate an existing file in `posts/`, update the filename, title, date and body, keep the `Citation` block at the end, then add links in `blog.html` and `index.html`.

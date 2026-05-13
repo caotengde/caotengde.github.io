@@ -531,6 +531,40 @@ h3 {
   font-size: 0.92rem;
 }
 
+.citation-panel {
+  margin-top: 56px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 25px rgba(23, 32, 38, 0.06);
+}
+
+.citation-panel h2 {
+  margin-top: 0;
+}
+
+.citation-panel p {
+  margin-bottom: 14px;
+}
+
+.citation-text {
+  color: var(--muted);
+}
+
+.citation-bibtex {
+  margin: 0;
+  padding: 16px 18px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf6;
+  color: var(--ink);
+  font: 0.93rem/1.6 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .article th,
 .article td {
   min-width: 120px;
