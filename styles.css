@@ -334,6 +334,11 @@ h3 {
   text-decoration-color: currentColor;
 }
 
+.note-actions,
+.article-utility {
+  margin-top: 14px;
+}
+
 .publication-list,
 .post-list,
 .timeline {
@@ -443,6 +448,10 @@ h3 {
 
 .post-row h2 {
   font-size: clamp(1.5rem, 3vw, 2.1rem);
+}
+
+.post-row .note-actions {
+  margin-top: 16px;
 }
 
 .article-main {
