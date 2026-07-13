@@ -55,7 +55,7 @@ a:hover {
   justify-content: space-between;
   gap: 24px;
   padding: 18px max(24px, calc((100vw - var(--max)) / 2));
-  color: #ffffff;
+  color: var(--ink);
   transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
 
@@ -110,8 +110,8 @@ a:hover {
   align-items: flex-end;
   min-height: clamp(520px, 78vh, 780px);
   overflow: hidden;
-  color: #ffffff;
-  background: #152027;
+  color: var(--ink);
+  background: #f7f5f0;
 }
 
 .hero-image {
@@ -126,8 +126,8 @@ a:hover {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(10, 20, 24, 0.82) 0%, rgba(10, 20, 24, 0.58) 44%, rgba(10, 20, 24, 0.2) 100%),
-    linear-gradient(0deg, rgba(10, 20, 24, 0.82) 0%, rgba(10, 20, 24, 0.06) 58%);
+    linear-gradient(90deg, rgba(251, 250, 246, 0.97) 0%, rgba(251, 250, 246, 0.9) 38%, rgba(251, 250, 246, 0.28) 62%, rgba(251, 250, 246, 0) 100%),
+    linear-gradient(0deg, rgba(251, 250, 246, 0.5) 0%, rgba(251, 250, 246, 0) 45%);
 }
 
 .hero-content {
@@ -160,7 +160,7 @@ a:hover {
 .hero-copy {
   max-width: 660px;
   margin: 24px 0 0;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(23, 32, 38, 0.82);
   font-size: clamp(1.05rem, 2.2vw, 1.35rem);
 }
 
