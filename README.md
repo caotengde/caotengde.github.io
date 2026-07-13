@@ -40,4 +40,4 @@ https://caotengde.github.io
 - Site icon: `assets/favicon.svg`
 - Homepage hero image: `assets/research-path-hero-academic.png`
 
-To add a new note, duplicate an existing file in `posts/`, update the filename, title, date and body, keep the `Citation` block at the end, then add links in `blog.html` and `index.html`.
+To add a new note, duplicate an existing file in `posts/`, update the filename, title, date and body, keep the `Citation` block at the end, then add links in `blog.html` and `index.html`. The shared `script.js` automatically adds a path-specific Giscus comments section to article pages.

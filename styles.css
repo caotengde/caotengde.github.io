@@ -617,6 +617,26 @@ h3 {
   word-break: break-word;
 }
 
+.comments-panel {
+  margin-top: 56px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
+}
+
+.article .comments-panel h2 {
+  margin: 0;
+}
+
+.comments-intro {
+  margin: 8px 0 24px;
+  color: var(--muted);
+}
+
+.giscus,
+.giscus-frame {
+  width: 100%;
+}
+
 .article th,
 .article td {
   min-width: 120px;
