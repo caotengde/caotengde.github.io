@@ -88,6 +88,76 @@
       </div>
     </section>
 
+    <section class="gallery-section" aria-labelledby="gallery-title">
+      <div class="gallery-heading reveal">
+        <div>
+          <p class="kicker">Our little universe · Nuestro pequeño universo</p>
+          <h2 id="gallery-title">Six frames.<br>One beautiful story.</h2>
+          <p lang="es">Seis instantes. Una historia preciosa.</p>
+        </div>
+        <p class="gallery-instruction">Tap a photo to hold the moment a little longer.<br><span lang="es">Toca una foto para quedarte un poco más en ese momento.</span></p>
+      </div>
+
+      <div class="memory-gallery" data-gallery>
+        <figure class="gallery-item gallery-item-portrait reveal">
+          <button type="button" data-gallery-index="0" aria-label="Open a favorite portrait of Teng and Yukari">
+            <img src="assets/memory-portrait.jpg" alt="Teng and Yukari smiling closely together on a sunny day" width="665" height="1182" loading="lazy" decoding="async">
+          </button>
+          <figcaption>
+            <span>My favorite place is next to you.</span>
+            <span lang="es">Mi lugar favorito está a tu lado.</span>
+          </figcaption>
+        </figure>
+
+        <figure class="gallery-item gallery-item-cologne reveal">
+          <button type="button" data-gallery-index="1" aria-label="Open a travel photo of Teng and Yukari by the river">
+            <img src="assets/memory-cologne.jpg" alt="Teng and Yukari smiling by a river, with Yukari making a heart with her hands" width="1024" height="768" loading="lazy" decoding="async">
+          </button>
+          <figcaption>
+            <span>Across every city, always us.</span>
+            <span lang="es">En cada ciudad, siempre nosotros.</span>
+          </figcaption>
+        </figure>
+
+        <figure class="gallery-item gallery-item-darmstadt reveal">
+          <button type="button" data-gallery-index="2" aria-label="Open a recent outdoor photo of Teng and Yukari">
+            <img src="assets/memory-darmstadt.jpg" alt="Teng and Yukari smiling together outdoors at a lively gathering" width="768" height="1024" loading="lazy" decoding="async">
+          </button>
+          <figcaption>
+            <span>You make every day brighter.</span>
+            <span lang="es">Haces que cada día sea más luminoso.</span>
+          </figcaption>
+        </figure>
+
+        <figure class="gallery-item gallery-item-chengdu reveal">
+          <button type="button" data-gallery-index="3" aria-label="Open a cozy tea-time photo of Teng and Yukari">
+            <img src="assets/memory-chengdu.jpg" alt="Teng and Yukari sharing tea together at a wooden table" width="1024" height="768" loading="lazy" decoding="async">
+          </button>
+          <figcaption>
+            <span>The quiet moments mean everything.</span>
+            <span lang="es">Los momentos tranquilos lo significan todo.</span>
+          </figcaption>
+        </figure>
+
+        <figure class="gallery-item gallery-item-bridge reveal">
+          <button type="button" data-gallery-index="4" aria-label="Open a sunny travel selfie of Teng and Yukari">
+            <img src="assets/memory-bridge.jpg" alt="Teng and Yukari taking a sunny travel selfie with green hills behind them" width="768" height="1024" loading="lazy" decoding="async">
+          </button>
+          <figcaption>
+            <span>Still choosing you, in every adventure.</span>
+            <span lang="es">Te sigo eligiendo, en cada aventura.</span>
+          </figcaption>
+        </figure>
+
+        <aside class="gallery-quote reveal">
+          <span aria-hidden="true">“</span>
+          <p>Life with you is the memory I never want to stop making.</p>
+          <p lang="es">La vida contigo es el recuerdo que nunca quiero dejar de crear.</p>
+        </aside>
+      </div>
+      <p class="swipe-note">Swipe to explore <span aria-hidden="true">→</span> <span lang="es">Desliza para explorar</span></p>
+    </section>
+
     <section class="letter-section" id="letter" aria-labelledby="letter-title">
       <div class="letter-stars" aria-hidden="true"></div>
       <div class="letter-heading reveal">
@@ -190,6 +260,16 @@
     <p>In every language I know, my favorite word is still your name.</p>
     <p lang="es">En todos los idiomas que conozco, mi palabra favorita sigue siendo tu nombre.</p>
     <p class="dialog-love">I love you. <span lang="es">Te amo.</span></p>
+  </dialog>
+
+  <dialog class="gallery-dialog" data-gallery-dialog aria-label="Photo viewer">
+    <button class="gallery-dialog-close" type="button" data-gallery-close aria-label="Close photo viewer">×</button>
+    <button class="gallery-nav gallery-nav-prev" type="button" data-gallery-prev aria-label="Previous photo">←</button>
+    <figure>
+      <img data-gallery-image src="assets/memory-portrait.jpg" alt="">
+      <figcaption data-gallery-caption></figcaption>
+    </figure>
+    <button class="gallery-nav gallery-nav-next" type="button" data-gallery-next aria-label="Next photo">→</button>
   </dialog>
 
   <script src="script.js"></script>
