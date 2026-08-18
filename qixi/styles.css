@@ -1026,6 +1026,21 @@ h2 {
   font-style: italic;
 }
 
+.letter-card .letter-chapter {
+  margin: 58px 0 24px;
+  padding: 13px 0;
+  border-top: 1px solid rgba(214, 186, 120, 0.4);
+  border-bottom: 1px solid rgba(214, 186, 120, 0.18);
+  color: var(--gold);
+  font-family: var(--sans);
+  font-size: 0.66rem;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
 .letter-card .signature {
   margin-top: 42px;
   color: var(--rose-light);
