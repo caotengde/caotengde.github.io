@@ -20,7 +20,36 @@
   <meta name="twitter:image" content="https://caotengde.github.io/qixi/assets/qixi-sky.png">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="is-locked">
+  <div class="password-gate" data-password-gate role="dialog" aria-modal="true" aria-labelledby="gate-title">
+    <div class="gate-sky" aria-hidden="true"></div>
+    <div class="gate-orbit gate-orbit-one" aria-hidden="true"></div>
+    <div class="gate-orbit gate-orbit-two" aria-hidden="true"></div>
+    <div class="gate-card">
+      <p class="gate-stars" aria-hidden="true">✦ · ✧ · ✦</p>
+      <p class="kicker">For Yukari only · Solo para Yukari</p>
+      <h1 id="gate-title">Our story is<br>waiting for you.</h1>
+      <p class="gate-spanish" lang="es">Nuestra historia te está esperando.</p>
+      <p class="gate-clue">The password is the day our forever began.<br><span lang="es">La contraseña es el día en que comenzó nuestro para siempre.</span></p>
+
+      <form class="password-form" data-password-form novalidate>
+        <label for="qixi-password">Our date <span lang="es">· Nuestra fecha</span></label>
+        <div class="password-field">
+          <input id="qixi-password" data-password-input type="password" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="YYYYMMDD" aria-describedby="password-format password-error" required>
+          <button type="submit">
+            <span>Open</span>
+            <span lang="es">Abrir</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+        <p id="password-format" class="password-format">8 digits · 8 dígitos</p>
+        <p id="password-error" class="password-error" data-password-error aria-live="polite"></p>
+      </form>
+
+      <p class="gate-signature">Teng <span aria-hidden="true">×</span> Yukari</p>
+    </div>
+  </div>
+
   <a class="skip-link" href="#letter">Skip to the letter</a>
 
   <header class="site-header" data-header>

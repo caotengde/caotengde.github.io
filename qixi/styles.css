@@ -31,6 +31,16 @@ body {
   line-height: 1.7;
 }
 
+body.is-locked {
+  overflow: hidden;
+}
+
+body.is-locked .site-header,
+body.is-locked main,
+body.is-locked footer {
+  visibility: hidden;
+}
+
 body::before {
   position: fixed;
   inset: 0;
@@ -55,6 +65,232 @@ button:focus-visible,
 a:focus-visible {
   outline: 2px solid var(--rose-light);
   outline-offset: 5px;
+}
+
+.password-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  overflow: hidden;
+  padding: 26px;
+  isolation: isolate;
+  background: #080d20;
+  transition: opacity 480ms ease, transform 480ms ease;
+}
+
+.password-gate[hidden] {
+  display: none;
+}
+
+.password-gate.is-opening {
+  opacity: 0;
+  transform: scale(1.025);
+}
+
+.gate-sky {
+  position: absolute;
+  inset: -3%;
+  z-index: -3;
+  background-image: url("assets/qixi-sky.png");
+  background-position: center;
+  background-size: cover;
+  filter: brightness(0.5) saturate(0.82);
+  animation: drift 18s ease-in-out infinite alternate;
+}
+
+.password-gate::before {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  content: "";
+  background:
+    radial-gradient(circle at 50% 50%, rgba(29, 17, 45, 0.22), rgba(5, 9, 25, 0.82) 72%),
+    linear-gradient(180deg, rgba(4, 8, 23, 0.35), rgba(4, 8, 23, 0.72));
+}
+
+.gate-orbit {
+  position: absolute;
+  z-index: -1;
+  border: 1px solid rgba(214, 186, 120, 0.15);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.gate-orbit::before {
+  position: absolute;
+  top: 12%;
+  left: 10%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 15px var(--gold);
+  content: "";
+}
+
+.gate-orbit-one {
+  width: min(80vw, 820px);
+  aspect-ratio: 1;
+  transform: rotate(25deg);
+}
+
+.gate-orbit-two {
+  width: min(58vw, 590px);
+  aspect-ratio: 1;
+  transform: rotate(-42deg);
+}
+
+.gate-card {
+  width: min(600px, 100%);
+  padding: clamp(38px, 7vw, 70px);
+  border: 1px solid rgba(246, 238, 226, 0.2);
+  background: rgba(9, 13, 31, 0.74);
+  box-shadow: 0 36px 120px rgba(0, 0, 0, 0.46);
+  text-align: center;
+  backdrop-filter: blur(20px);
+}
+
+.gate-stars {
+  margin: 0 0 24px;
+  color: var(--gold);
+  font-size: 0.8rem;
+  letter-spacing: 0.42em;
+}
+
+.gate-card h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(3.4rem, 8vw, 5.8rem);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 0.82;
+}
+
+.gate-spanish {
+  margin: 24px 0 0;
+  color: var(--rose-light);
+  font-family: var(--serif);
+  font-size: 1.28rem;
+  font-style: italic;
+}
+
+.gate-clue {
+  margin: 30px 0 0;
+  color: rgba(246, 238, 226, 0.63);
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.gate-clue span {
+  color: rgba(243, 199, 189, 0.82);
+  font-style: italic;
+}
+
+.password-form {
+  margin-top: 35px;
+  text-align: left;
+}
+
+.password-form label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--gold);
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.password-field {
+  display: flex;
+  min-height: 58px;
+  border: 1px solid rgba(246, 238, 226, 0.34);
+  border-radius: 100px;
+  background: rgba(4, 8, 22, 0.58);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.password-field:focus-within {
+  border-color: var(--rose-light);
+  box-shadow: 0 0 0 3px rgba(243, 199, 189, 0.1);
+}
+
+.password-field input {
+  min-width: 0;
+  flex: 1;
+  padding: 0 22px;
+  border: 0;
+  outline: 0;
+  color: var(--ivory);
+  background: transparent;
+  font: 500 1rem/1 var(--sans);
+  letter-spacing: 0.14em;
+}
+
+.password-field input::placeholder {
+  color: rgba(246, 238, 226, 0.35);
+}
+
+.password-field button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 5px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 100px;
+  color: var(--night);
+  background: var(--rose-light);
+  cursor: pointer;
+  font: 600 0.67rem/1 var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.password-field button:hover {
+  background: var(--ivory);
+  transform: translateX(2px);
+}
+
+.password-format,
+.password-error {
+  min-height: 18px;
+  margin: 9px 18px 0;
+  font-size: 0.62rem;
+}
+
+.password-format {
+  color: rgba(246, 238, 226, 0.36);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.password-error {
+  display: none;
+  color: var(--rose-light);
+}
+
+.password-error:not(:empty) {
+  display: block;
+}
+
+.password-form.has-error .password-field {
+  border-color: var(--rose);
+  animation: gate-shake 360ms ease;
+}
+
+.gate-signature {
+  margin: 35px 0 0;
+  color: rgba(246, 238, 226, 0.36);
+  font-family: var(--serif);
+  font-size: 0.86rem;
+  font-style: italic;
+  letter-spacing: 0.08em;
 }
 
 .skip-link {
@@ -1084,6 +1320,12 @@ footer p + p {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+@keyframes gate-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-7px); }
+  75% { transform: translateX(7px); }
+}
+
 @media (max-width: 840px) {
   .opening {
     grid-template-columns: 40px 1fr;
@@ -1151,6 +1393,41 @@ footer p + p {
 }
 
 @media (max-width: 580px) {
+  .password-gate {
+    padding: 15px;
+  }
+
+  .gate-card {
+    padding: 34px 22px;
+  }
+
+  .gate-card h1 {
+    font-size: clamp(3.2rem, 17vw, 4.6rem);
+  }
+
+  .gate-orbit-one {
+    width: 120vw;
+  }
+
+  .gate-orbit-two {
+    width: 86vw;
+  }
+
+  .password-field input {
+    padding: 0 15px;
+    font-size: 0.86rem;
+  }
+
+  .password-field button {
+    gap: 5px;
+    padding: 0 13px;
+    font-size: 0.57rem;
+  }
+
+  .gate-signature {
+    margin-top: 22px;
+  }
+
   .site-header {
     padding: 18px 20px;
   }

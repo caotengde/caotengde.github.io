@@ -6,7 +6,66 @@ const galleryDialog = document.querySelector("[data-gallery-dialog]");
 const galleryImage = document.querySelector("[data-gallery-image]");
 const galleryCaption = document.querySelector("[data-gallery-caption]");
 const galleryButtons = [...document.querySelectorAll("[data-gallery-index]")];
+const passwordGate = document.querySelector("[data-password-gate]");
+const passwordForm = document.querySelector("[data-password-form]");
+const passwordInput = document.querySelector("[data-password-input]");
+const passwordError = document.querySelector("[data-password-error]");
+const protectedContent = [document.querySelector(".site-header"), document.querySelector("main"), document.querySelector("footer")].filter(Boolean);
 let activeGalleryIndex = 0;
+
+const PASSWORD_HASH = "d4f84e9b4c90d55243cdedf9f261d38f911c1393727f33954a85e6fcbbd5d2be";
+const SESSION_KEY = "qixi-story-unlocked";
+
+const setContentLocked = (locked) => {
+  protectedContent.forEach((element) => {
+    element.inert = locked;
+  });
+};
+
+const unlockStory = (animate = true) => {
+  setContentLocked(false);
+  document.body.classList.remove("is-locked");
+
+  if (!passwordGate) return;
+  if (animate) passwordGate.classList.add("is-opening");
+
+  window.setTimeout(() => {
+    passwordGate.hidden = true;
+  }, animate ? 480 : 0);
+};
+
+const hashPassword = async (value) => {
+  const normalized = value.replace(/\D/g, "");
+  const bytes = new TextEncoder().encode(normalized);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+};
+
+setContentLocked(true);
+
+if (sessionStorage.getItem(SESSION_KEY) === "yes") {
+  unlockStory(false);
+} else {
+  window.setTimeout(() => passwordInput?.focus(), 120);
+}
+
+passwordForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  passwordForm.classList.remove("has-error");
+  passwordError.textContent = "";
+
+  const submittedHash = await hashPassword(passwordInput.value);
+
+  if (submittedHash === PASSWORD_HASH) {
+    sessionStorage.setItem(SESSION_KEY, "yes");
+    unlockStory();
+    return;
+  }
+
+  passwordForm.classList.add("has-error");
+  passwordError.textContent = "That date does not open our story. · Esa fecha no abre nuestra historia.";
+  passwordInput.select();
+});
 
 const updateHeader = () => {
   header?.classList.toggle("is-scrolled", window.scrollY > 28);
