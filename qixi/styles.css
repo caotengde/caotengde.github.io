@@ -501,6 +501,77 @@ h2 {
   background: linear-gradient(var(--gold), transparent);
 }
 
+.soundtrack {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(320px, 1.2fr);
+  gap: clamp(36px, 7vw, 90px);
+  align-items: center;
+  width: min(1060px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: clamp(72px, 9vw, 110px) 0 12px;
+}
+
+.soundtrack-copy h2 {
+  margin: 0;
+  color: var(--rose-light);
+  font-family: "Songti SC", "STSong", var(--serif);
+  font-size: clamp(3.8rem, 7.5vw, 6.2rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 0.92;
+}
+
+.soundtrack-copy > p:not(.kicker, .soundtrack-artist) {
+  margin: 24px 0 0;
+  color: rgba(246, 238, 226, 0.68);
+  font-family: var(--serif);
+  font-size: 1.16rem;
+  line-height: 1.5;
+}
+
+.soundtrack-copy > p span {
+  color: var(--rose-light);
+  font-style: italic;
+}
+
+.soundtrack-artist {
+  margin: 23px 0 0;
+  color: var(--gold);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.soundtrack-player {
+  padding: 20px;
+  border: 1px solid rgba(246, 238, 226, 0.14);
+  background:
+    radial-gradient(circle at 90% 0, rgba(233, 160, 162, 0.15), transparent 42%),
+    rgba(17, 25, 50, 0.75);
+  box-shadow: 0 28px 80px rgba(2, 5, 20, 0.28);
+}
+
+.soundtrack-player iframe {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+}
+
+.soundtrack-player p {
+  margin: 13px 4px 0;
+  color: rgba(246, 238, 226, 0.45);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.soundtrack-player p span {
+  color: rgba(243, 199, 189, 0.72);
+}
+
 .opening,
 .promises {
   width: min(1180px, calc(100% - 48px));
@@ -1342,6 +1413,10 @@ footer p + p {
 }
 
 @media (max-width: 840px) {
+  .soundtrack {
+    grid-template-columns: 1fr;
+  }
+
   .opening {
     grid-template-columns: 40px 1fr;
   }
@@ -1490,6 +1565,15 @@ footer p + p {
   .opening,
   .promises {
     width: calc(100% - 40px);
+  }
+
+  .soundtrack {
+    width: calc(100% - 40px);
+    padding-top: 72px;
+  }
+
+  .soundtrack-player {
+    padding: 12px;
   }
 
   .memory-section {
