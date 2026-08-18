@@ -10,6 +10,8 @@ const passwordGate = document.querySelector("[data-password-gate]");
 const passwordForm = document.querySelector("[data-password-form]");
 const passwordInput = document.querySelector("[data-password-input]");
 const passwordError = document.querySelector("[data-password-error]");
+const soundtrackPreview = document.querySelector("[data-soundtrack-preview]");
+const soundtrackStatus = document.querySelector("[data-soundtrack-status]");
 const protectedContent = [document.querySelector(".site-header"), document.querySelector("main"), document.querySelector("footer")].filter(Boolean);
 let activeGalleryIndex = 0;
 
@@ -41,10 +43,28 @@ const hashPassword = async (value) => {
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 };
 
+const playSoundtrackPreview = () => {
+  if (!soundtrackPreview) return;
+
+  soundtrackPreview.currentTime = 0;
+  const playback = soundtrackPreview.play();
+
+  playback?.then(() => {
+    if (soundtrackStatus) soundtrackStatus.textContent = "Now playing: 喜欢你 · Reproduciendo: 喜欢你";
+  }).catch(() => {
+    if (soundtrackStatus) soundtrackStatus.textContent = "Tap play above to begin · Toca el botón de reproducción para empezar";
+  });
+};
+
+soundtrackPreview?.addEventListener("ended", () => {
+  if (soundtrackStatus) soundtrackStatus.textContent = "Preview finished — continue with the full player above · La vista previa terminó — continúa arriba";
+});
+
 setContentLocked(true);
 
 if (sessionStorage.getItem(SESSION_KEY) === "yes") {
   unlockStory(false);
+  playSoundtrackPreview();
 } else {
   window.setTimeout(() => passwordInput?.focus(), 120);
 }
@@ -58,6 +78,7 @@ passwordForm?.addEventListener("submit", async (event) => {
 
   if (submittedHash === PASSWORD_HASH) {
     sessionStorage.setItem(SESSION_KEY, "yes");
+    playSoundtrackPreview();
     unlockStory();
     return;
   }
